@@ -9,7 +9,7 @@
 2. Go to the settings for the VM -> Network
 3. Select Port Forwarding
 
-![Drag Racing](https://github.com/rag-h/mtrn4230_course_development/blob/main/rtde/images/portforwarding.png)
+![Port Forwarding](https://github.com/rag-h/mtrn4230_course_development/blob/main/rtde/images/portforwarding.png)
 
 4. Create a new rule with the following, but remember to replace the IP address with yours.
 
@@ -26,4 +26,7 @@
 ```
 ipconfig
 ```
-3. The IPv$ Address is your IP address
+3. The IPv4 Address is your IP address
+
+### Mac
+1. Follow [guide](https://kb.wisc.edu/helpdesk/page.php?id=6526)

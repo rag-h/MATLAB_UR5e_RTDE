@@ -14,7 +14,6 @@ classdef rtde
         end
 
         % Close Socket
-
         function close(obj)
             fclose(obj.socket);
             delete(obj.socket);
@@ -22,8 +21,22 @@ classdef rtde
 
             disp("Socket Disconnected!")
         end
-    
-    
+        
+        % Function call for move c
+        function poses = movec(obj,target)
+            poses = move(obj,'c',target);
+        end
+
+        % Function call for move j
+        function poses = movej(obj,target)
+            poses = move(obj,'j',target);
+        end
+        
+        % Function call for move l
+        function poses = movel(obj,target)
+            poses = move(obj,'l',target);
+        end
+
         % Following function returns the list of poses that the robot followed to
         % get from pose A to pose B
         function poses = move(obj,type,target)
@@ -62,12 +75,9 @@ classdef rtde
             % We set a tolerance value as the robotic arm's motions in the real
             % world is not perfect. In the sim is is perfect though
         
-            while any(abs(poses(end,:) - target) > tolerance,'all') %&& checkSafetyMode(obj) == 1
+            while any(abs(poses(end,:) - target) > tolerance,'all')
                 poses(end+1,:) = toolVectorActual(obj);
-                if(checkSafetyMode(obj) ~= 1)
-
-                   disp("woopsie");
-                end
+                checkSafetyMode(obj);
                 pause(0.1);
             end
         

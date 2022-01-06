@@ -9,9 +9,11 @@
 2. Go to the settings for the VM -> Network
 3. Select Port Forwarding
 
-![Drag Racing](Dragster.jpg)
+![Drag Racing](https://github.com/rag-h/mtrn4230_course_development/blob/main/rtde/images/portforwarding.png)
 
 4. Create a new rule with the following, but remember to replace the IP address with yours.
+
+
 | Name   | Protocol | Host IP      | Host Port | Guest IP  | Guest Port |
 |--------|----------|--------------|-----------|-----------|------------|
 | Rule x | TCP      | IPv4 Address | 30003     | 10.0.2.15 | 30003      |

@@ -2,7 +2,7 @@
 clear all;
 
 % TCP Host and Port settings
-host = '192.168.1.187';
+host = '127.0.0.1';
 port = 30003;
 
 % Calling the constructor of rtde to setup tcp connction

@@ -1,3 +1,4 @@
+% https://s3-eu-west-1.amazonaws.com/ur-support-site/32554/scriptManual-3.5.4.pdf
 classdef rtde
     properties
         socket
@@ -23,8 +24,28 @@ classdef rtde
         end
         
         % Function call for move c
-        function poses = movec(obj,target)
-            poses = move(obj,'c',target);
+        % movec(p[x,y,z,0,0,0], pose_to, a=1.2, v=0.25, r=0.05, mode=1)
+        function poses = movec(obj,via_point, pose_to,a,v,r,mode)
+             if ~exist('a','var')
+                 % third parameter does not exist, so default it to something
+                  a = 1.2;
+             end
+             if ~exist('v','var')
+                 % third parameter does not exist, so default it to something
+                  v = 0.25;
+             end
+             if ~exist('r','var')
+                 % third parameter does not exist, so default it to something
+                  r = 0.025;
+             end
+             if ~exist('mode','var')
+                 % third parameter does not exist, so default it to something
+                  mode = 1;
+             end
+
+
+            poses = move(obj,'c',pose_to,via_point,a,v,r,mode);
+            
         end
 
         % Function call for move j
@@ -37,29 +58,52 @@ classdef rtde
             poses = move(obj,'l',target);
         end
 
+        % Function call for move p
+        function poses = movep(obj,target)
+            poses = move(obj,'p',target);
+        end
+
         % Following function returns the list of poses that the robot followed to
         % get from pose A to pose B
-        function poses = move(obj,type,target)
+        function poses = move(obj,type,target,via_point,a,v,r,mode)
         
             flushinput(obj.socket)
             flushoutput(obj.socket)
         
-            tolerance = [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001];
+           tolerance = [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001];
         
             target(1:3) = target(1:3) * 0.001; % Converting to meter
         
-            % Converting pose to string
-            target_char = ['move', type ,'(p[',num2str(target(1)),',',...
-                num2str(target(2)),',',...
-                num2str(target(3)),',',...
-                num2str(target(4)),',',...
-                num2str(target(5)),',',...
-                num2str(target(6)),...
-                '])\n'];
+            if(type == "c")
+                tolerance = [0.05,0.05,0.05,5,5,5];
+                % Converting pose to string
+                via_point(1:3) = via_point(1:3) * 0.001; % Converting to meter
+                target_char = ['move', type ,'(p[',num2str(via_point(1)),',',...
+                    num2str(via_point(2)),',',...
+                    num2str(via_point(3)),',',...
+                    num2str(via_point(4)),',',...
+                    num2str(via_point(5)),',',...
+                    num2str(via_point(6)),...
+                    '],p[',num2str(target(1)),',',...
+                    num2str(target(2)),',',...
+                    num2str(target(3)),',',...
+                    num2str(target(4)),',',...
+                    num2str(target(5)),',',...
+                    num2str(target(6)),...
+                    '],a=' num2str(a) ', v=' num2str(v) ', r=' num2str(r) ',mode=' num2str(mode) ')\n'];
+            else
+                % Converting pose to string
+                target_char = ['move', type ,'(p[',num2str(target(1)),',',...
+                    num2str(target(2)),',',...
+                    num2str(target(3)),',',...
+                    num2str(target(4)),',',...
+                    num2str(target(5)),',',...
+                    num2str(target(6)),...
+                    '])\n'];
+            end
         
             % Sending the command through as bytes
             fprintf(obj.socket,target_char);
-        
             % Pause for a short interval to allow the command to be received 
             pause(0.3);
             

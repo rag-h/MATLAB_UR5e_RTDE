@@ -32,7 +32,7 @@ hold on;
 for i = 1:10:360
     p = (p1-startPoint(1:3))*rotz(i,'deg')+startPoint(1:3);
 %     plot_point((p'*0.001), 'label', ' p', 'solid', 'ko')
-    poses = cat(1,poses,rtde.movec([p,2.2214, -2.2214, 0.00],target,a,v,r,mode));
+    poses = cat(1,poses,rtde.movec([p,2.2214, -2.2214, 0.00],target,'pose',a,v,r,mode));
     poses = cat(1,poses,rtde.movej(target));
     rtde.movel(startPoint);
 end

@@ -2,7 +2,8 @@
 clear all;
 
 % TCP Host and Port settings
-host = '127.0.0.1';
+% host = '127.0.0.1';
+host = '192.168.0.100';
 port = 30003;
 
 % Calling the constructor of rtde to setup tcp connction
@@ -10,10 +11,10 @@ rtde = rtde(host,port);
 
 % Defining points
 home = [-588.53, -133.30, 371.91, 2.2214, -2.2214, 0.00];
-point1 = [-588.53, -133.30, 150, 2.2214, -2.2214, 0.00];
-point2 = [-688.53, -133.30, 150, 2.2214, -2.2214, 0.00];
-point3 = [-688.53, -233.30, 150, 2.2214, -2.2214, 0.00];
-point4 = [-588.53, -233.30, 150, 2.2214, -2.2214, 0.00];
+point1 = [-588.53, -133.30, 200, 2.2214, -2.2214, 0.00];
+point2 = [-688.53, -133.30, 200, 2.2214, -2.2214, 0.00];
+point3 = [-688.53, -233.30, 200, 2.2214, -2.2214, 0.00];
+point4 = [-588.53, -233.30, 200, 2.2214, -2.2214, 0.00];
 
 % Executing the movement. 
 % How does the movement look when you use movel instead?

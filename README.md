@@ -15,4 +15,5 @@ An abstraction layer allowing tcp communication between Matlab (windows) to ursi
 
 
 9. Press save
-10. To run the program, you will need Instrument Control Toolbox in Matlab
+10. Follow setup instructions contained in the README in the rtde folder.
+11. To run the program, you will need Instrument Control Toolbox in Matlab

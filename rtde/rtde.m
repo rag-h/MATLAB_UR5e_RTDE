@@ -12,9 +12,7 @@ classdef rtde
         function obj = rtde(host,port)
 
             obj.frequency = 0.01;
-            obj.host = host;
-            obj.port = port;
- 
+
             obj.socket = tcpip(host, port);
 
             obj.socket.InputBufferSize = 1220;

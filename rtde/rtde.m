@@ -348,60 +348,60 @@ classdef rtde
         end
         
 
-        % Target must be 
-        function joint_positions = servoj(obj,target_joint_positions,t,lookahead_time,gain)
-            % Setting defaults if the following variables do not exist
-            if ~exist('t','var')
-                 t = 0.008;
-            end
-
-            if ~exist('lookahead_time','var')
-                 lookahead_time = 0.1;
-            end
-
-            if ~exist('gain','var')
-                 gain = 300;
-            end
-
-            tolerance = [0.05,0.05,0.05,0.05,0.05,0.05];
-
-            target_char = ['servoj','([',num2str(target_joint_positions(1)),',',...
-                    num2str(target_joint_positions(2)),',',...
-                    num2str(target_joint_positions(3)),',',...
-                    num2str(target_joint_positions(4)),',',...
-                    num2str(target_joint_positions(5)),',',...
-                    num2str(target_joint_positions(6)),...
-                    '],0,0,' num2str(t) ',' num2str(lookahead_time) ',' num2str(gain) ')\n'];
-
-            % Sending the command through as bytes
-            fprintf(obj.socket,target_char);
-            % Pause for a short interval to allow the command to be received 
-            pause(0.3);
-
-            time0 = tic;
-            timeLimit = 30; % 10 seconds
-            
-            joint_positions = actualJointPositions(obj);
-
-            while any(abs(joint_positions(end,:) - target_joint_positions) > tolerance,'all') 
-                joint_positions(end+1,:) = actualJointPositions(obj);           
-                checkSafetyMode(obj);
-                pause(obj.frequency);
-
-%                 poses(end,:)
-%                 target_joint_positions
-%                 abs(poses(end,:) - target_joint_positions)
-%                 tolerance
-
-                if toc(time0)>timeLimit
-                    disp("Failed!");
-                    return;
-                end
-             end 
-            disp("Succeeded!")
-
-
-        end
+%         % Target must be 
+%         function joint_positions = servoj(obj,target_joint_positions,t,lookahead_time,gain)
+%             % Setting defaults if the following variables do not exist
+%             if ~exist('t','var')
+%                  t = 0.008;
+%             end
+% 
+%             if ~exist('lookahead_time','var')
+%                  lookahead_time = 0.1;
+%             end
+% 
+%             if ~exist('gain','var')
+%                  gain = 300;
+%             end
+% 
+%             tolerance = [0.05,0.05,0.05,0.05,0.05,0.05];
+% 
+%             target_char = ['servoj','([',num2str(target_joint_positions(1)),',',...
+%                     num2str(target_joint_positions(2)),',',...
+%                     num2str(target_joint_positions(3)),',',...
+%                     num2str(target_joint_positions(4)),',',...
+%                     num2str(target_joint_positions(5)),',',...
+%                     num2str(target_joint_positions(6)),...
+%                     '],0,0,' num2str(t) ',' num2str(lookahead_time) ',' num2str(gain) ')\n'];
+% 
+%             % Sending the command through as bytes
+%             fprintf(obj.socket,target_char);
+%             % Pause for a short interval to allow the command to be received 
+%             pause(0.3);
+% 
+%             time0 = tic;
+%             timeLimit = 30; % 10 seconds
+%             
+%             joint_positions = actualJointPositions(obj);
+% 
+%             while any(abs(joint_positions(end,:) - target_joint_positions) > tolerance,'all') 
+%                 joint_positions(end+1,:) = actualJointPositions(obj);           
+%                 checkSafetyMode(obj);
+%                 pause(obj.frequency);
+% 
+% %                 poses(end,:)
+% %                 target_joint_positions
+% %                 abs(poses(end,:) - target_joint_positions)
+% %                 tolerance
+% 
+%                 if toc(time0)>timeLimit
+%                     disp("Failed!");
+%                     return;
+%                 end
+%              end 
+%             disp("Succeeded!")
+% 
+% 
+%         end
 
         
         % ROBOT MODE
@@ -491,46 +491,34 @@ classdef rtde
                 
         end
         
+        % Get actual joint positions 
         function pos = actualJointPositions(obj)
-
-            % Following is the offset in the message to retrieve the joint
-            % positions
             byteOffset = 4 + 8 + 48 + 48 + 48 + 48 + 48;
             pos = readData(obj,byteOffset);
-
         end
-
+    
+        % Get actual joint velocities of all joints
         function pos = actualJointVelocities(obj)
-
-            % Following is the offset in the message to retrieve the joint
-            % velocities
             byteOffset = 4 + 8 + 48 + 48 + 48 + 48 + 48 + 48;
             pos = readData(obj,byteOffset);
-
         end
         
+        % Get target joint accelerations of all joints
         function pos = targetJointAccelerations(obj)
-
-            % Following is the offset in the message to retrieve the tool position.
             byteOffset = 4 + 8 + 48 + 48;
             pos = readData(obj,byteOffset);
-
         end
 
+        % Get target joint position of all joints
         function pos = targetJointPositions(obj)
-
-            % Following is the offset in the message to retrieve the tool position.
             byteOffset = 4 + 8;
             pos = readData(obj,byteOffset);
-
         end
 
+        %Get target pose 
         function pos = targetToolVector(obj)
-
-            % Following is the offset in the message to retrieve the tool position.
             byteOffset = 4 + 8 + 48 + 48 + 48 + 48 + 48+ 48 + 48 + 48 + 48 + 48 + 48 + 48;
             pos = readData(obj,byteOffset);
-
         end
         
 
@@ -538,27 +526,20 @@ classdef rtde
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Returns the x,y,z,rx,ry,rz of the actual tool position
         function pos = toolVectorActual(obj)
-
-            % Following is the offset in the message to retrieve the tool position.
             byteOffset = 4 + 8 + 48 + 48 + 48 + 48 + 48+ 48 + 48 + 48 + 48;
             pos = readData(obj,byteOffset);
-
         end
-
+        
+        % Get actual TCP speed
         function pos = TCPSpeedActual(obj)
-
-            % Following is the offset in the message to retrieve the tool position.
             byteOffset = 4 + 8 + 48 + 48 + 48 + 48 + 48+ 48 + 48 + 48 + 48 + 48;
             pos = readData(obj,byteOffset);
-
         end
 
+        % Get target joint torques
         function pos = targetJointTorques(obj)
-
-            % Following is the offset in the message to retrieve the tool position.
             byteOffset = 4 + 8 + 48 + 48 + 48 + 48;
             pos = readData(obj,byteOffset);
-
         end
 
         % Following function reads the data recieved from the robot

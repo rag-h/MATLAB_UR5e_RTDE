@@ -8,6 +8,7 @@ Before you can run the example files, you will need to install the VM with URsim
 3. Extract the downloaded folder.
 4. Open Virtual box
 5. On the Tools menu, selected Add.
+6. ![Virtualbox Add](https://github.com/rag-h/mtrn4230_course_development/blob/main/rtde/images/virtualboxAdd.png)
 
 6. Find the extract folder and selected the "somefilename.vbox" image
 7. Follow Setting up Port Forwarding between host and VM

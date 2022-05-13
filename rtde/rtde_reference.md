@@ -153,13 +153,13 @@ Returns the target joint accelerations that were set.
 
 ## Get target tcp position:
 
-Definition: pos = targetToolVector()
+Definition: pos = targetPosePositions()
 
 Returns the target pose of the tcp. Format: x,y,z,rx,ry,rz
 
 ## Get actual tcp position:
 
-Definition: pos = toolVectorActual()
+Definition: pos = actualPosePositions()
 
 Returns the actual pose of the tcp. Format: x,y,z,rx,ry,rz
 

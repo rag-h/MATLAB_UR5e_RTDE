@@ -1,4 +1,8 @@
-%% ----- EXAMPLE 0: Basic Usage -----
+% Author: Raghav Hariharan
+% For MTRN4230 2022
+
+%% ----- EXAMPLE 0: Basic Usage 1 -----
+% This program shows the basic useage of the rtde library.
 clear all;
 
 % TCP Host and Port settings
@@ -10,35 +14,44 @@ port = 30003;
 rtde = rtde(host,port);
 
 % Defining points
+% Notes these are [x,y,z,r,p,y]
+% x,y,z are in mm, as URsim uses mm as well
+% r,p,y are in radians
+
 home = [-588.53, -133.30, 371.91, 2.2214, -2.2214, 0.00];
 point1 = [-500, -300, 200, 2.22, -2.22, 0.00];
 
 % Executing the movement.
+
 % movej
-[poses1,joints1,jointVelocity1,a1,t1] = rtde.movej(home);
+[poses1,jointPos1,jointVel1,jointAcc1,jointTor1] = rtde.movej(home);
 % movel
-[poses2,joints2,jointVelocity2,a2,t2] = rtde.movej(point1);
-% movep
-% [poses3,joints3,jointVelocity3,a3] = rtde.movel(home);
+[poses2,jointPos2,jointVel2,jointAcc2,jointTor2] = rtde.movel(point1);
+
+% Lets move back home, but note that we aren't saving the movement
+% information to variables
 rtde.movel(home);
+
+
 % You can combine all of the poses like this
 poses = [poses1;poses2;];
 % and plot the path of the TCP
 rtde.drawPath(poses);
 
 % Similarly combine all of the joint positions like this and plot it
-joints = [joints1;joints2;];
+joints = [jointPos1;jointPos2;];
 rtde.drawJointPositions(joints)
 
-velocities = [jointVelocity1;jointVelocity2;];
+% Combine all of the joint velocities and plot
+velocities = [jointVel1;jointVel2;];
 rtde.drawJointVelocities(velocities);
 
-accelerations = [a1;a2;];
-
+% Combine all of the joint accelerations and plot
+accelerations = [jointAcc1;jointAcc2;];
 rtde.drawJointAccelerations(accelerations);
 
-
-torques = [t1;t2];
+% Combine all of the joint Torques and plot
+torques = [jointTor1;jointTor2];
 rtde.drawJointTorques(torques);
 
 % % OR concatenate the poses using the following method

@@ -1,4 +1,7 @@
-%% ----- EXAMPLE 4: Movec and RVC Toolbox  -----
+% Author: Raghav Hariharan
+% For MTRN4230 2022
+
+%% ----- Tutorial 3 Solution  -----
 % A for loop and a rotz command is used to automate the calculation on way
 % points to generate a sphere
 % Things to look at for students:
@@ -11,8 +14,8 @@ clear all;
 startup_rvc;
 
 % TCP Host and Port settings
-% host = '127.0.0.1';
-host = '192.168.0.100';
+host = '127.0.0.1';
+% host = '192.168.0.100';
 port = 30003;
 
 % Calling the constructor of rtde to setup tcp connction
@@ -31,29 +34,37 @@ mode=2;
 
 p1 = [-588.53, -400,  300];
 
+% Move to start position and initialise variables
 [poses,jointPos,jointVelocities,jointAccelerations,torques] = rtde.movel(startPoint);
 
 
-
+% Creating a for loop
 for i = 1:22.5:360
+
     p = (p1-startPoint(1:3))*rotz(i,'deg')+startPoint(1:3);
 
 
     [pose,joint,jointVelocity,jointAcceleration,torque] = rtde.movec([p,2.2214, -2.2214, 0.00],target,'pose',a,v,r,mode);
+    
+    % Contatenating the variable returned to the appropriate lists
     poses = cat(1,poses,pose);
     jointPos = cat(1,jointPos,joint);
     torques = cat(1,torques,torque);
     jointVelocities = cat(1,jointVelocities,jointVelocity);
     jointAccelerations = cat(1,jointAccelerations,jointAcceleration);
 
+    % Nudge the tool to the target position
     [pose,joint,jointVelocity,jointAcceleration,torque] = rtde.movej(target);
+    % Contatenating the variable returned to the appropriate lists
     poses = cat(1,poses,pose);
     jointPos = cat(1,jointPos,joint);
     torques = cat(1,torques,torque);
     jointVelocities = cat(1,jointVelocities,jointVelocity);
     jointAccelerations = cat(1,jointAccelerations,jointAcceleration);
 
+    % Move tool back to the start position
     [pose,joint,jointVelocity,jointAcceleration,torque] = rtde.movel(startPoint);
+    % Contatenating the variable returned to the appropriate lists
     poses = cat(1,poses,pose);
     jointPos = cat(1,jointPos,joint);
     torques = cat(1,torques,torque);
@@ -61,11 +72,12 @@ for i = 1:22.5:360
     jointAccelerations = cat(1,jointAccelerations,jointAcceleration);
 end
 
+
+% Plotting
 rtde.drawJointPositions(jointPos);
 rtde.drawJointAccelerations(jointAccelerations);
 rtde.drawJointVelocities(jointVelocities);
 rtde.drawJointTorques(torques);
-% Plotting the path of the TCP
 rtde.drawPath(poses);
 
 % Closing the TCP Connection

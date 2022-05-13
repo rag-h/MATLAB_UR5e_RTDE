@@ -1,3 +1,6 @@
+% Author: Raghav Hariharan
+% For MTRN4230 2022
+
 % https://s3-eu-west-1.amazonaws.com/ur-support-site/32554/scriptManual-3.5.4.pdf
 % https://s3-eu-west-1.amazonaws.com/ur-support-site/16496/ClientInterfaces_Realtime.pdf#%5B%7B%22num%22%3A20%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C57%2C542.78%2C0%5D
 classdef rtde
@@ -123,7 +126,7 @@ classdef rtde
         end
         
         % Function call for movel
-        % Definition: [poses,joints,jointVelocities,jointAccelerations,torques] = movel(target,a,v,t,r)
+        % Definition: [poses,joints,jointVelocities,jointAccelerations,torques] = movel(target,jointOrPose,a,v,t,r)
         % Move to position (linear in tool-space)
         % PARAMETERS:
         % *target*: Target pose (pose can also be specified as joint positions, then forward
@@ -185,165 +188,7 @@ classdef rtde
             [poses,joints,jointVelocities,jointAccelerations,torques] = move(obj,'p',target,[],jointOrPose,a,v,r);
         end
 
-        % Following function returns the list of poses that the robot followed to
-        % get from pose A to pose B. This function will be called by
-        % movec, movej, movel or movep functions. It is not intended to
-        % call this function directly.
-        function [poses,jointPositions,jointVelocities,jointAccelerations,torques] = move(obj,type,target,via_point,jointOrPose,a,v,r,t,mode)
-        
-            flushinput(obj.socket)
-            flushoutput(obj.socket)
-        
-           tolerance = [0.0001,0.0001,0.0001,0.001,0.001,0.001];
-            
-            if(jointOrPose == "joint")
-                if (type == "c")
-                    tolerance = [0.03,0.03,0.03,5,5,5];
-                    % Converting pose to string
-                    via_point(1:3) = via_point(1:3) * 0.001; % Converting to meter
-                    target_char = ['move', type ,'([',num2str(via_point(1)),',',...
-                        num2str(via_point(2)),',',...
-                        num2str(via_point(3)),',',...
-                        num2str(via_point(4)),',',...
-                        num2str(via_point(5)),',',...
-                        num2str(via_point(6)),...
-                        '],p[',num2str(target(1)),',',...
-                        num2str(target(2)),',',...
-                        num2str(target(3)),',',...
-                        num2str(target(4)),',',...
-                        num2str(target(5)),',',...
-                        num2str(target(6)),...
-                        '],a=' num2str(a) ', v=' num2str(v) ', r=' num2str(r) ',mode=' num2str(mode) ')\n'];
-                elseif (type == "p")
-                    target_char = ['move', type ,'([',num2str(target(1)),',',...
-                        num2str(target(2)),',',...
-                        num2str(target(3)),',',...
-                        num2str(target(4)),',',...
-                        num2str(target(5)),',',...
-                        num2str(target(6)),...
-                        '],a=' num2str(a) ', v=' num2str(v) ',r=' num2str(r) ')\n'];
-                else
-                    if(r ~= 0)
-                    tolerance(1:3) = r;
-                    end
-                    % Converting pose to string
-                    target_char = ['move', type ,'([',num2str(target(1)),',',...
-                        num2str(target(2)),',',...
-                        num2str(target(3)),',',...
-                        num2str(target(4)),',',...
-                        num2str(target(5)),',',...
-                        num2str(target(6)),...
-                        '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')\n']
-                end
-            else
-                target(1:3) = target(1:3) * 0.001; % Converting to meter
-                if (type == "c")
-
-                    tolerance = [0.03,0.03,0.03,5,5,5];
-
-                    % Converting pose to string
-                    via_point(1:3) = via_point(1:3) * 0.001; % Converting to meter
-                    target_char = ['move', type ,'(p[',num2str(via_point(1)),',',...
-                        num2str(via_point(2)),',',...
-                        num2str(via_point(3)),',',...
-                        num2str(via_point(4)),',',...
-                        num2str(via_point(5)),',',...
-                        num2str(via_point(6)),...
-                        '],p[',num2str(target(1)),',',...
-                        num2str(target(2)),',',...
-                        num2str(target(3)),',',...
-                        num2str(target(4)),',',...
-                        num2str(target(5)),',',...
-                        num2str(target(6)),...
-                        '],a=' num2str(a) ', v=' num2str(v) ', r=' num2str(r) ',mode=' num2str(mode) ')\n'];
-                elseif (type == "p")
-                    target_char = ['move', type ,'(p[',num2str(target(1)),',',...
-                        num2str(target(2)),',',...
-                        num2str(target(3)),',',...
-                        num2str(target(4)),',',...
-                        num2str(target(5)),',',...
-                        num2str(target(6)),...
-                        '],a=' num2str(a) ', v=' num2str(v) ',r=' num2str(r) ')\n'];
-                else
-                    if(r ~= 0)
-                    tolerance(1:3) = r;
-                    end
-                    % Converting pose to string
-                    target_char = ['move', type ,'(p[',num2str(target(1)),',',...
-                        num2str(target(2)),',',...
-                        num2str(target(3)),',',...
-                        num2str(target(4)),',',...
-                        num2str(target(5)),',',...
-                        num2str(target(6)),...
-                        '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')\n'];
-                end
-            end
-        
-            % Sending the command through as bytes
-            fprintf(obj.socket,target_char);
-            % Pause for a short interval to allow the command to be received 
-            pause(0.3);
-                        
-            % Determining whether or not the arm has reached the target position
-            % Poses(end,:) = current pose of the arm
-            % target = target pose of the arm
-            % poses(end,:) - target should be 0 if the robot arm has reached the
-            % target
-            % We set a tolerance value as the robotic arm's motions in the real
-            % world is not perfect. In the sim is is perfect though
-
-            if(jointOrPose == "joint")
-                function_to_call = @actualJointPositions;   
-                goal = actualJointPositions(obj);
-            else
-                function_to_call = @toolVectorActual; 
-                goal = toolVectorActual(obj);
-            end
-
-            time0 = tic;
-            timeLimit = 30; % 30 seconds
-
-            % Appending the inital position of the arm to an array
-            poses = toolVectorActual(obj);
-            jointPositions = actualJointPositions(obj);
-            jointVelocities = actualJointVelocities(obj);
-            jointAccelerations = targetJointAccelerations(obj);
-            torques = targetJointTorques(obj);
-
-            while any(abs(goal(end,:) - target) > tolerance,'all') 
-                goal(end+1,:) = function_to_call(obj); 
-
-                if(jointOrPose == "joint") % This means goal is already recording the joints. So record poses instead  
-                    poses(end+1,:) = toolVectorActual(obj);
-                else % This means goal is already recording the poses. So record joints instead 
-                    jointPositions(end+1,:) = actualJointPositions(obj);    
-                end
-
-                jointVelocities(end+1,:) = actualJointVelocities(obj);
-                jointAccelerations(end+1,:) = targetJointAccelerations(obj);
-                torques(end+1,:) = targetJointTorques(obj);
-
-                checkSafetyMode(obj);
-                pause(obj.frequency);
-
-                if toc(time0) > timeLimit
-                    if(jointOrPose == "joint")  
-                        jointPositions = goal;
-                    else 
-                        poses = goal;
-                    end
-                    disp("Time out. Something probably went wrong.!");
-                    return;
-                end
-            end
-
-            if(jointOrPose == "joint")  
-                jointPositions = goal;
-            else 
-                poses = goal;
-            end
-            disp("Succeeded!")
-        end
+       
         
 
 %         % Target must be 
@@ -514,7 +359,7 @@ classdef rtde
         end
 
         %Get target pose 
-        function pos = targetToolVector(obj)
+        function pos = targetPosePositions(obj)
             byteOffset = 4 + 8 + 48 + 48 + 48 + 48 + 48+ 48 + 48 + 48 + 48 + 48 + 48 + 48;
             pos = readData(obj,byteOffset);
         end
@@ -523,7 +368,7 @@ classdef rtde
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Returns the x,y,z,rx,ry,rz of the actual tool position
-        function pos = toolVectorActual(obj)
+        function pos = actualPosePositions(obj)
             byteOffset = 4 + 8 + 48 + 48 + 48 + 48 + 48+ 48 + 48 + 48 + 48;
             pos = readData(obj,byteOffset);
         end
@@ -540,33 +385,7 @@ classdef rtde
             pos = readData(obj,byteOffset);
         end
 
-        % Following function reads the data recieved from the robot
-        function data = readData(obj,byteOffset)
-            flushinput(obj.socket)
-            flushoutput(obj.socket)
         
-            if obj.socket.BytesAvailable>0
-                fread(obj.socket,obj.socket.BytesAvailable);
-            end
-            while obj.socket.BytesAvailable==0
-            end
-        
-            rec = fread(obj.socket,obj.socket.BytesAvailable);
-            
-            for i = 1 : 6
-        
-                bytePos = byteOffset+8*(i-1)+1;
-                received  = [rec(bytePos:bytePos+7)]';
-                res = swapbytes(typecast(uint8(received),'double'));
-        
-                if i <= 3 
-                    data(i) = round(res,6);
-                else
-                    data(i) = round(res,6);
-                end
-                
-            end
-        end
         
        
         function drawJointPositions(obj,jointPositions)
@@ -653,8 +472,197 @@ classdef rtde
         function frequency = getFrequency(obj)
             frequency = obj.frequency;
         end
+
     end
+    methods (Access = private)
+        % Following function returns the list of poses that the robot followed to
+        % get from pose A to pose B. This function will be called by
+        % movec, movej, movel or movep functions. It is not intended to
+        % call this function directly.
+        function [poses,jointPositions,jointVelocities,jointAccelerations,torques] = move(obj,type,target,via_point,jointOrPose,a,v,r,t,mode)
+        
+            flushinput(obj.socket)
+            flushoutput(obj.socket)
+        
+           tolerance = [0.0001,0.0001,0.0001,0.001,0.001,0.001];
+            
+            if(jointOrPose == "joint")
+                if (type == "c")
+                    tolerance = [0.03,0.03,0.03,5,5,5];
+                    % Converting pose to string
+                    via_point(1:3) = via_point(1:3) * 0.001; % Converting to meter
+                    target_char = ['move', type ,'([',num2str(via_point(1)),',',...
+                        num2str(via_point(2)),',',...
+                        num2str(via_point(3)),',',...
+                        num2str(via_point(4)),',',...
+                        num2str(via_point(5)),',',...
+                        num2str(via_point(6)),...
+                        '],p[',num2str(target(1)),',',...
+                        num2str(target(2)),',',...
+                        num2str(target(3)),',',...
+                        num2str(target(4)),',',...
+                        num2str(target(5)),',',...
+                        num2str(target(6)),...
+                        '],a=' num2str(a) ', v=' num2str(v) ', r=' num2str(r) ',mode=' num2str(mode) ')\n'];
+                elseif (type == "p")
+                    target_char = ['move', type ,'([',num2str(target(1)),',',...
+                        num2str(target(2)),',',...
+                        num2str(target(3)),',',...
+                        num2str(target(4)),',',...
+                        num2str(target(5)),',',...
+                        num2str(target(6)),...
+                        '],a=' num2str(a) ', v=' num2str(v) ',r=' num2str(r) ')\n'];
+                else
+                    if(r ~= 0)
+                    tolerance(1:3) = r;
+                    end
+                    % Converting pose to string
+                    target_char = ['move', type ,'([',num2str(target(1)),',',...
+                        num2str(target(2)),',',...
+                        num2str(target(3)),',',...
+                        num2str(target(4)),',',...
+                        num2str(target(5)),',',...
+                        num2str(target(6)),...
+                        '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')\n'];
+                end
+            else
+                target(1:3) = target(1:3) * 0.001; % Converting to meter
+                if (type == "c")
 
+                    tolerance = [0.03,0.03,0.03,5,5,5];
 
+                    % Converting pose to string
+                    via_point(1:3) = via_point(1:3) * 0.001; % Converting to meter
+                    target_char = ['move', type ,'(p[',num2str(via_point(1)),',',...
+                        num2str(via_point(2)),',',...
+                        num2str(via_point(3)),',',...
+                        num2str(via_point(4)),',',...
+                        num2str(via_point(5)),',',...
+                        num2str(via_point(6)),...
+                        '],p[',num2str(target(1)),',',...
+                        num2str(target(2)),',',...
+                        num2str(target(3)),',',...
+                        num2str(target(4)),',',...
+                        num2str(target(5)),',',...
+                        num2str(target(6)),...
+                        '],a=' num2str(a) ', v=' num2str(v) ', r=' num2str(r) ',mode=' num2str(mode) ')\n'];
+                elseif (type == "p")
+                    target_char = ['move', type ,'(p[',num2str(target(1)),',',...
+                        num2str(target(2)),',',...
+                        num2str(target(3)),',',...
+                        num2str(target(4)),',',...
+                        num2str(target(5)),',',...
+                        num2str(target(6)),...
+                        '],a=' num2str(a) ', v=' num2str(v) ',r=' num2str(r) ')\n'];
+                else
+                    if(r ~= 0)
+                    tolerance(1:3) = r;
+                    end
+                    % Converting pose to string
+                    target_char = ['move', type ,'(p[',num2str(target(1)),',',...
+                        num2str(target(2)),',',...
+                        num2str(target(3)),',',...
+                        num2str(target(4)),',',...
+                        num2str(target(5)),',',...
+                        num2str(target(6)),...
+                        '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')\n'];
+                end
+            end
+        
+            % Sending the command through as bytes
+            fprintf(obj.socket,target_char);
+            % Pause for a short interval to allow the command to be received 
+            pause(0.3);
+                        
+            % Determining whether or not the arm has reached the target position
+            % Poses(end,:) = current pose of the arm
+            % target = target pose of the arm
+            % poses(end,:) - target should be 0 if the robot arm has reached the
+            % target
+            % We set a tolerance value as the robotic arm's motions in the real
+            % world is not perfect. In the sim is is perfect though
+
+            if(jointOrPose == "joint")
+                function_to_call = @actualJointPositions;   
+                goal = actualJointPositions(obj);
+            else
+                function_to_call = @actualPosePositions; 
+                goal = actualPosePositions(obj);
+            end
+
+            time0 = tic;
+            timeLimit = 30; % 30 seconds
+
+            % Appending the inital position of the arm to an array
+            poses = actualPosePositions(obj);
+            jointPositions = actualJointPositions(obj);
+            jointVelocities = actualJointVelocities(obj);
+            jointAccelerations = targetJointAccelerations(obj);
+            torques = targetJointTorques(obj);
+
+            while any(abs(goal(end,:) - target) > tolerance,'all') 
+                goal(end+1,:) = function_to_call(obj); 
+
+                if(jointOrPose == "joint") % This means goal is already recording the joints. So record poses instead  
+                    poses(end+1,:) = actualPosePositions(obj);
+                else % This means goal is already recording the poses. So record joints instead 
+                    jointPositions(end+1,:) = actualJointPositions(obj);    
+                end
+
+                jointVelocities(end+1,:) = actualJointVelocities(obj);
+                jointAccelerations(end+1,:) = targetJointAccelerations(obj);
+                torques(end+1,:) = targetJointTorques(obj);
+
+                checkSafetyMode(obj);
+                pause(obj.frequency);
+
+                if toc(time0) > timeLimit
+                    if(jointOrPose == "joint")  
+                        jointPositions = goal;
+                    else 
+                        poses = goal;
+                    end
+                    disp("Time out. Something probably went wrong.!");
+                    return;
+                end
+            end
+
+            if(jointOrPose == "joint")  
+                jointPositions = goal;
+            else 
+                poses = goal;
+            end
+            disp("Succeeded!")
+        end
+
+        % Following function reads the data recieved from the robot
+        function data = readData(obj,byteOffset)
+            flushinput(obj.socket)
+            flushoutput(obj.socket)
+        
+            if obj.socket.BytesAvailable>0
+                fread(obj.socket,obj.socket.BytesAvailable);
+            end
+            while obj.socket.BytesAvailable==0
+            end
+        
+            rec = fread(obj.socket,obj.socket.BytesAvailable);
+            
+            for i = 1 : 6
+        
+                bytePos = byteOffset+8*(i-1)+1;
+                received  = [rec(bytePos:bytePos+7)]';
+                res = swapbytes(typecast(uint8(received),'double'));
+        
+                if i <= 3 
+                    data(i) = round(res,6);
+                else
+                    data(i) = round(res,6);
+                end
+                
+            end
+        end
+
+    end
 
 end

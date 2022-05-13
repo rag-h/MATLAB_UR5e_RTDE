@@ -1,4 +1,7 @@
-%% ----- MOVEJ -----
+% Author: Raghav Hariharan
+% For MTRN4230 2022
+
+%% ----- Example 4 : Simple MOVEJ -----
 clear all;
 
 % TCP Host and Port settings
@@ -9,7 +12,8 @@ port = 30003;
 rtde = rtde(host,port);
 
 
-% Definition: movej(target,a,v,t,r)
+    
+% Definition: [poses,joints,jointVelocities,jointAccelerations,torques] = movej(target,jointOrPose,a,v,t,r)
 % Move to position (linear in joint-space)
 % When using this command, the robot must be at a standstill or come
 % from a movej or movel with a blend. The speed and acceleration
@@ -19,6 +23,8 @@ rtde = rtde(host,port);
 % PARAMETERS:
 % *target*: Joint positions or pose. If pose is given then inverse kinematics
 % is used to calculate the corresponding joint positions
+% *jointOrPose*= "joint" or "pose" to provide joint inputs or pose
+% inputs
 % *a* = joint acceleration of the leading axis (default = 1.4)
 % *v* = joint speed of the leading axis (default = 1.05)
 % *t* = time (s) (default = 0). If it were specified the command would ignore
@@ -33,6 +39,14 @@ point1 = [-588.53, -133.30, 150, 2.2214, -2.2214, 0.00];
 point2 = [-688.53, -133.30, 150, 2.2214, -2.2214, 0.00];
 point3 = [-688.53, -233.30, 150, 2.2214, -2.2214, 0.00];
 point4 = [-588.53, -233.30, 150, 2.2214, -2.2214, 0.00];
+
+% Joint Positions
+% home = [-2.69606900000000	-1.83257300000000	-1.57086200000000	-1.30890000000000	1.57081700000000	-2.69599800000000];
+% point1 = [-2.69611900000000	-2.01735600000000	-1.80293400000000	-0.892044000000000	1.57081600000000	-2.69611900000000];
+% point2 = [-2.75911500000000	-2.21060700000000	-1.47753600000000	-1.02419200000000	1.57081900000000	-2.75911500000000];
+% point3 = [-2.63049400000000	-2.26435200000000	-1.38215900000000	-1.06582200000000	1.57081200000000	-2.63049400000000];
+% point4 = [-2.55204200000000	-2.07477000000000	-1.70951400000000	-0.928048000000000	1.57080800000000	-2.55204200000000];
+
 
 % Play around with these values and see what you observe!
 % What happens when you set a large/small r value?
@@ -72,6 +86,7 @@ poses7 = rtde.movej(home);
 poses = [poses1;poses2;poses3;poses4;poses5;poses6;poses7;];
 % and plot the path of the TCP
 rtde.drawPath(poses);
+
 
 
 % Closing the TCP Connection

@@ -326,7 +326,8 @@ classdef rtde
                 case 11
                     msgtext = 'Safety Mode Undefined Safety Mode';
                 otherwise
-                    disp('other value')
+                    msgtext = 'Safety Mode unknown!';
+                    disp(safetyMode)
             end
                                                
                 ME = MException(errID,msgtext);

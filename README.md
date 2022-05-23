@@ -1,6 +1,9 @@
 # mtrn4230_rtde
 An abstraction layer allowing tcp communication between Matlab (windows) to ursim (linux in vm).
 
+## Pre-requsites
+1. Ensure that you have setup the URSim properly.
+
 ## Download from Github
 1. Download code as a zip file.
 2. Extract contents.

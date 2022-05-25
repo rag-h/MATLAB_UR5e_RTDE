@@ -633,7 +633,7 @@ classdef rtde
             else 
                 poses = goal;
             end
-            disp("Succeeded!")
+            disp("Succeeded!");
         end
 
         % Following function reads the data recieved from the robot

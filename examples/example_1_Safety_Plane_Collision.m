@@ -10,8 +10,8 @@
 clear all;
 
 % TCP Host and Port settings
-%host = '192.168.0.100';
-host = '127.0.0.1';
+host = '127.0.0.1'; % THIS IP ADDRESS MUST BE USED FOR THE VM
+% host = '192.168.0.100'; % THIS IP ADDRESS MUST BE USED FOR THE REAL ROBOT
 port = 30003;
 
 % Calling the constructor of rtde to setup tcp connction

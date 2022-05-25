@@ -10,7 +10,8 @@
 clc;
 clear all;
 
-host = '192.168.0.100';
+% TCP Host and Port settings
+host = '192.168.0.100'; % THIS IP ADDRESS MUST BE USED FOR THE REAL ROBOT
 rtdeport = 30003;
 vacuumport = 63352;
 

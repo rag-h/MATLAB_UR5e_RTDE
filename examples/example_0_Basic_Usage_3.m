@@ -7,7 +7,8 @@
 clear all;
 
 % TCP Host and Port settings
-host = '127.0.0.1';
+host = '127.0.0.1'; % THIS IP ADDRESS MUST BE USED FOR THE VM
+% host = '192.168.0.100'; % THIS IP ADDRESS MUST BE USED FOR THE REAL ROBOT
 port = 30003;
 
 % Calling the constructor of rtde to setup tcp connction
@@ -21,7 +22,7 @@ rtde.movel(target);
 
 % Print out the joint angles at the target position.
 % Returns in radians
-rtde.actualJointPositions()
+rad2deg(rtde.actualJointPositions())
 
 % Print out the pose at the target position. 
 % Returns x,y,z in meters

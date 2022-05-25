@@ -1,4 +1,4 @@
-# mtrn4230_rtde
+# MATLAB UR5e RTDE
 An abstraction layer allowing tcp communication between Matlab (windows) to ursim (linux in vm).
 
 ## Pre-requsites

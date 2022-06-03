@@ -43,7 +43,14 @@ An abstraction layer allowing tcp communication between Matlab (windows) to ursi
 ## Verify that the RTDE Toolbox works
 1. Open up the Virtual Machine
 2. Open up the UR5e URsim application
-3. Start the UR5e
+3. Start the UR5e. Make sure that the red power indicator on the bottom left corner is green. If it is red, select the red power circle. Then press ON -> SELECT on the menu displayed. The red power indicator will now turn green and the robot is now in the powered on state.
+Robot powered off state:
+![Powered Off](https://github.com/rag-h/MATLAB_UR5e_RTDE/blob/main/rtde/images/ursimpoweredoff.png)
+
+Robot powered on state:
+![Powered ON](https://github.com/rag-h/MATLAB_UR5e_RTDE/blob/main/rtde/images/usimpoweredon.png)
+
+
 4. Open up MATLAB
 5. Open up the "example_0_Basic_Usage_1.m" file from inside the examples folder.
 6. Make sure that the host IP is :'127.0.0.1'. If it isn't change it
@@ -59,3 +66,6 @@ An abstraction layer allowing tcp communication between Matlab (windows) to ursi
 
 ### Connecting to the Real UR5e
 1. Make sure the IP address is '192.168.0.100' when connecting to the real robot.
+
+### UR5e connection Established! but only getting Time out. Something probably went wrong.! errors:
+1. You probably have not started up the UR5e robot in URsim. Check to make sure that the power indicator on the bottom left corner in URsim is green and NOT red. If it is red, you will need to power on the UR5e.

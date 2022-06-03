@@ -74,10 +74,10 @@ classdef rtde
                 v = 0.25;
             end
             if ~exist('r','var')
-                r = 0.025;
+                r = 0.05;
             end
             if ~exist('mode','var')
-                mode = 1;
+                mode = 0;
             end
 
             [poses,joints,jointVelocities,jointAccelerations,torques] = move(obj,'c',pose_to,via_point,jointOrPose,a,v,r,0,mode);
@@ -485,11 +485,15 @@ classdef rtde
             flushinput(obj.socket)
             flushoutput(obj.socket)
         
-           tolerance = [0.0001,0.0001,0.0001,0.001,0.001,0.001];
+%            tolerance = [0.0001,0.0001,0.0001,0.001,0.001,0.001];
+           tolerance = [0.0001+r,0.0001+r,0.0001+r,0.001,0.001,0.001];
             
             if(jointOrPose == "joint")
                 if (type == "c")
-                    tolerance = [0.03,0.03,0.03,5,5,5];
+%                     tolerance = [0.03,0.03,0.03,5,5,5];
+%                     tolerance = [0.002+r,0.002+r,0.002+r,0.001,0.001,0.001];
+                    tolerance = [0.0001+r,0.0001+r,0.0001+r,0.001,0.001,0.001];
+                    
                     % Converting pose to string
                     via_point(1:3) = via_point(1:3) * 0.001; % Converting to meter
                     target_char = ['move', type ,'([',num2str(via_point(1)),',',...
@@ -530,7 +534,9 @@ classdef rtde
                 target(1:3) = target(1:3) * 0.001; % Converting to meter
                 if (type == "c")
 
-                    tolerance = [0.03,0.03,0.03,5,5,5];
+%                     tolerance = [0.002+r,0.002+r,0.002+r,0.001,0.001,0.001];
+%                     tolerance = [0.0005+r,0.0005+r,0.0005+r,0.001,0.001,0.001];
+                    tolerance = [0.0001+r,0.0001+r,0.0001+r,0.001,0.001,0.001];
 
                     % Converting pose to string
                     via_point(1:3) = via_point(1:3) * 0.001; % Converting to meter
@@ -601,9 +607,16 @@ classdef rtde
             jointAccelerations = targetJointAccelerations(obj);
             torques = targetJointTorques(obj);
 
-            while any(abs(goal(end,:) - target) > tolerance,'all') 
+            while (any(abs(goal(end,:) - target) > tolerance,'all'))
                 goal(end+1,:) = function_to_call(obj); 
 
+                % If the current TCP velocity is all 0, that means the
+                % robot reached it  final position. This is used as a
+                % backup incase the final stop position of the ur5e isn't within the
+                % tolerance specified.
+                if all(TCPSpeedActual(obj) == 0)
+                    break
+                end            
                 if(jointOrPose == "joint") % This means goal is already recording the joints. So record poses instead  
                     poses(end+1,:) = actualPosePositions(obj);
                 else % This means goal is already recording the poses. So record joints instead 
@@ -623,7 +636,15 @@ classdef rtde
                     else 
                         poses = goal;
                     end
-                    disp("Time out. Something probably went wrong.!");
+                    disp("Time out. Something probably went wrong. Check if the Current pose and Target Pose are within the specified tolerance!");
+                    disp("-----DEBUGGING-----")
+                    disp("Current Pose")
+                    disp(goal(end,:))
+                    disp("Target Pose")
+                    disp(target)
+                    disp("The tolerance is set to:")
+                    disp(tolerance)
+                    
                     return;
                 end
             end

@@ -301,7 +301,7 @@ classdef rtde
             result = swapbytes(typecast(uint8(data),'double'));
             safetyMode = round(result,6);
             
-            if safetyMode == 1 || safetyMode == 2
+            if safetyMode == 0 || safetyMode == 1 || safetyMode == 2 
                 return
             end
 

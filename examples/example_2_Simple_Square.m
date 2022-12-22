@@ -6,14 +6,15 @@ clear all;
 
 % TCP Host and Port settings
 host = '127.0.0.1'; % THIS IP ADDRESS MUST BE USED FOR THE VM
+% host = '192.168.230.128'
 % host = '192.168.0.100'; % THIS IP ADDRESS MUST BE USED FOR THE REAL ROBOT
 port = 30003;
 
 % Calling the constructor of rtde to setup tcp connction
 rtde = rtde(host,port);
 
-% Defining points
-% Poses
+% % Defining points
+% % Poses
 % home = [-588.53, -133.30, 371.91, 2.2214, -2.2214, 0.00];
 % point1 = [-588.53, -133.30, 200, 2.2214, -2.2214, 0.00];
 % point2 = [-688.53, -133.30, 200, 2.2214, -2.2214, 0.00];
@@ -21,15 +22,15 @@ rtde = rtde(host,port);
 % point4 = [-588.53, -233.30, 200, 2.2214, -2.2214, 0.00];
 % 
 % 
-% % Executing the movement. 
-% % How does the movement look when you use movel instead?
-% [poses1,joints1] = rtde.movej(home);
-% [poses2,joints2]  = rtde.movej(point1);
-% [poses3,joints3]  = rtde.movej(point2);
-% [poses4,joints4]  = rtde.movej(point3);
-% [poses5,joints5]  = rtde.movej(point4);
+% Executing the movement. 
+% How does the movement look when you use movel instead?
+% [poses1,joints1] = rtde.movel(home);
+% [poses2,joints2]  = rtde.movel(point1);
+% [poses3,joints3]  = rtde.movel(point2);
+% [poses4,joints4]  = rtde.movel(point3);
+% [poses5,joints5]  = rtde.movel(point4);
 % 
-% [poses6,joints6] = rtde.movej(point1);
+% [poses6,joints6] = rtde.movel(point1);
 
                 %% ----- %%        
 % The following is an example using joint positions instead of poses.
@@ -55,8 +56,10 @@ point4 = [-2.55204200000000	-2.07477000000000	-1.70951400000000	-0.9280480000000
 % Combining both resultant pose lists
 poses = [poses1;poses2;poses3;poses4;poses5;poses6];
 
-% Plotting the path of the TCP
-rtde.drawPath(poses)
 
+% Plotting the path of the TCP
+
+rtde.drawPath(poses)
+rtde.drawJointPositions(joints)
 % Closing the TCP Connection
 rtde.close();

@@ -416,7 +416,7 @@ classdef rtde
             plot(jointVelocities(:,6));
             title('Joint Velocities');
             xlabel('Time (s)'); 
-            ylabel('Velocity (m/s)');
+            ylabel('Velocity (rad/s)');
             legend({'Base','Shoulder','Elbow','Wrist 1','Wrist 2','Wrist 3'},'Location','southwest');
             hold off;
         end
@@ -432,7 +432,7 @@ classdef rtde
             plot(jointAccelerations(:,6));
             title('Joint Accelerations');
             xlabel('Time (s)'); 
-            ylabel('Acceleration (m/s^2)');
+            ylabel('Acceleration (rad/s^2)');
             legend({'Base','Shoulder','Elbow','Wrist 1','Wrist 2','Wrist 3'},'Location','southwest');
             hold off;
         end

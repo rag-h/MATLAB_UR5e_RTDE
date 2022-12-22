@@ -58,6 +58,7 @@ rtde.drawJointTorques(torques);
 % poses = rtde.movej(home);
 % poses = cat(1,poses,rtde.movel(point1));
 % poses = cat(1,poses,rtde.movep(home));
+% 
 % % and plot them as follows
 % rtde.drawPath(poses);
 

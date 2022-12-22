@@ -6,6 +6,7 @@ clear all;
 
 % TCP Host and Port settings
 host = '127.0.0.1'; % THIS IP ADDRESS MUST BE USED FOR THE VM
+% host = '10.0.2.15';
 % host = '192.168.0.100'; % THIS IP ADDRESS MUST BE USED FOR THE REAL ROBOT
 port = 30003;
 
@@ -30,13 +31,14 @@ target = [-588.53, -300, 150, 2.2214, -2.2214, 0.00];
 % solution to draw a sphere while the mode is 1?
 
 a = 1.2; % Tool Acceleration
-v = 0.25; % Tool Velocity
-r = 0.025; % Blend radius
+v = 1; % Tool Velocity
+r = 0.00; % Blend radius
+
 
 % Tool Mode. 
 % 0 = unconstrained (rotation angle of tool can change)
 % 1 = Fixed ( rotation angle of tool will not change
-mode = 2;
+mode = 0;
 
 
 % Move to start point. The top of the circle

@@ -23,6 +23,8 @@ point1 = [-500, -300, 200, 2.22, -2.22, 0.00];
 
 [~,jointPos2,~,jointAcc2] = rtde.movej(point1);
 
+
+
 % Ploting the joint positions
 joints = [jointPos1;jointPos2;];
 rtde.drawJointPositions(joints)

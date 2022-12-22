@@ -50,7 +50,7 @@ point4 = [-588.53, -233.30, 200, 2.2214, -2.2214, 0.00];
 
 a = 1.0;
 v = 0.1;
-r = 0;
+r = 0.05;
 
 % Remember when you set t, it will have priority over the a and v
 % parameters that you have set!

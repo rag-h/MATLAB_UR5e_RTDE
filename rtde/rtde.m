@@ -142,23 +142,71 @@ classdef rtde
 
         function [poses,joints,jointVelocities,jointAccelerations,torques] = movel(obj,target,jointOrPose,a,v,t,r)
             % Setting defaults if the following variables do not exist
-            if ~exist('jointOrPose','var')
-                jointOrPose = "pose";
-            end
-            if ~exist('a','var')
-                 a = 1.2;
-            end
-            if ~exist('v','var')
-                v = 0.25;
-            end
-            if ~exist('t','var')
-                 t = 0;
-            end
-            if ~exist('r','var')
-                 r = 0;
+%             disp(target)
+            n = size(target,1);
+            
+            if n == 1
+                if ~exist('jointOrPose','var')
+                    jointOrPose = "pose";
+                end
+                if ~exist('a','var')
+                     a = 1.2;
+                end
+                if ~exist('v','var')
+                    v = 0.25;
+                end
+                if ~exist('t','var')
+                     t = 0;
+                end
+                if ~exist('r','var')
+                     r = 0;
+                end
+
+%                 tar = target;
+%                 tar(1:3) = tar(1:3) * 0.001;
+    
+                [poses,joints,jointVelocities,jointAccelerations,torques] = move(obj,'l',target,[],jointOrPose,a,v,r,t);
+%                 target_char = ['movel' ,'(p[',num2str(tar(1)),',',...
+%                 num2str(tar(2)),',',...
+%                 num2str(tar(3)),',',...
+%                 num2str(tar(4)),',',...
+%                 num2str(tar(5)),',',...
+%                 num2str(tar(6)),...
+%                 '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')\n'];
+%                 
+%                 command = command + '' + target_char;
+            else
+               command = "def function():";
+                for i = 1:n
+%                     disp("Needs to be handled")
+                    tar = target(i,1:6);
+                    tar(1:3) = tar(1:3) * 0.001;
+                    jointOrPose = "pose";
+                    a = target(i,7);
+                    v = target(i,8);
+                    t = target(i,9);
+                    r = target(i,10);
+
+                    target_char = ['movel' ,'(p[',num2str(tar(1)),',',...
+                    num2str(tar(2)),',',...
+                    num2str(tar(3)),',',...
+                    num2str(tar(4)),',',...
+                    num2str(tar(5)),',',...
+                    num2str(tar(6)),...
+                    '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')\n'];
+                    
+                    command = command + '' + target_char;
+    
+                end
+
+                 % Sending the command through as bytes
+                command = command + 'end\n';
+    
+                [poses,joints,jointVelocities,jointAccelerations,torques] = obj.sendCommand(command,jointOrPose);
+
             end
 
-            [poses,joints,jointVelocities,jointAccelerations,torques] = move(obj,'l',target,[],jointOrPose,a,v,r,t);
+            
         end
 
         % Function call for move p
@@ -188,65 +236,7 @@ classdef rtde
             [poses,joints,jointVelocities,jointAccelerations,torques] = move(obj,'p',target,[],jointOrPose,a,v,r);
         end
 
-       
-        
-
-%         % Target must be 
-%         function joint_positions = servoj(obj,target_joint_positions,t,lookahead_time,gain)
-%             % Setting defaults if the following variables do not exist
-%             if ~exist('t','var')
-%                  t = 0.008;
-%             end
-% 
-%             if ~exist('lookahead_time','var')
-%                  lookahead_time = 0.1;
-%             end
-% 
-%             if ~exist('gain','var')
-%                  gain = 300;
-%             end
-% 
-%             tolerance = [0.05,0.05,0.05,0.05,0.05,0.05];
-% 
-%             target_char = ['servoj','([',num2str(target_joint_positions(1)),',',...
-%                     num2str(target_joint_positions(2)),',',...
-%                     num2str(target_joint_positions(3)),',',...
-%                     num2str(target_joint_positions(4)),',',...
-%                     num2str(target_joint_positions(5)),',',...
-%                     num2str(target_joint_positions(6)),...
-%                     '],0,0,' num2str(t) ',' num2str(lookahead_time) ',' num2str(gain) ')\n'];
-% 
-%             % Sending the command through as bytes
-%             fprintf(obj.socket,target_char);
-%             % Pause for a short interval to allow the command to be received 
-%             pause(0.3);
-% 
-%             time0 = tic;
-%             timeLimit = 30; % 10 seconds
-%             
-%             joint_positions = actualJointPositions(obj);
-% 
-%             while any(abs(joint_positions(end,:) - target_joint_positions) > tolerance,'all') 
-%                 joint_positions(end+1,:) = actualJointPositions(obj);           
-%                 checkSafetyMode(obj);
-%                 pause(obj.frequency);
-% 
-% %                 poses(end,:)
-% %                 target_joint_positions
-% %                 abs(poses(end,:) - target_joint_positions)
-% %                 tolerance
-% 
-%                 if toc(time0)>timeLimit
-%                     disp("Failed!");
-%                     return;
-%                 end
-%              end 
-%             disp("Succeeded!")
-% 
-% 
-%         end
-
-        
+              
         % ROBOT MODE
         % RETURN VALUES:
         %-1 : ROBOT_MODE_NO_CONTROLLE
@@ -490,8 +480,7 @@ classdef rtde
             
             if(jointOrPose == "joint")
                 if (type == "c")
-%                     tolerance = [0.03,0.03,0.03,5,5,5];
-%                     tolerance = [0.002+r,0.002+r,0.002+r,0.001,0.001,0.001];
+
                     tolerance = [0.0001+r,0.0001+r,0.0001+r,0.001,0.001,0.001];
                     
                     % Converting pose to string
@@ -683,6 +672,94 @@ classdef rtde
                 end
                 
             end
+        end
+
+        function [poses,jointPositions,jointVelocities,jointAccelerations,torques] =  sendCommand(obj,command,jointOrPose)
+            flushinput(obj.socket);
+            flushoutput(obj.socket);
+            fprintf(obj.socket,command);
+
+            tolerance = [0.0001,0.0001,0.0001,0.001,0.001,0.001];
+
+                        % Pause for a short interval to allow the command to be received 
+            pause(0.3);
+                        
+            % Determining whether or not the arm has reached the target position
+            % Poses(end,:) = current pose of the arm
+            % target = target pose of the arm
+            % poses(end,:) - target should be 0 if the robot arm has reached the
+            % target
+            % We set a tolerance value as the robotic arm's motions in the real
+            % world is not perfect. In the sim is is perfect though
+
+            if(jointOrPose == "joint")
+                function_to_call = @actualJointPositions;   
+                goal = actualJointPositions(obj);
+            else
+                function_to_call = @actualPosePositions; 
+                goal = actualPosePositions(obj);
+            end
+
+            time0 = tic;
+            timeLimit = 60; % 30 seconds
+
+            % Appending the inital position of the arm to an array
+            poses = actualPosePositions(obj);
+            jointPositions = actualJointPositions(obj);
+            jointVelocities = actualJointVelocities(obj);
+            jointAccelerations = targetJointAccelerations(obj);
+            torques = targetJointTorques(obj);
+
+            target = obj.targetPosePositions()
+
+            while (any(abs(goal(end,:) - target) > tolerance,'all'))
+                goal(end+1,:) = function_to_call(obj); 
+
+                % If the current TCP velocity is all 0, that means the
+                % robot reached it  final position. This is used as a
+                % backup incase the final stop position of the ur5e isn't within the
+                % tolerance specified.
+                if all(TCPSpeedActual(obj) == 0)
+                    break
+                end            
+                if(jointOrPose == "joint") % This means goal is already recording the joints. So record poses instead  
+                    poses(end+1,:) = actualPosePositions(obj);
+                else % This means goal is already recording the poses. So record joints instead 
+                    jointPositions(end+1,:) = actualJointPositions(obj);    
+                end
+
+                jointVelocities(end+1,:) = actualJointVelocities(obj);
+                jointAccelerations(end+1,:) = targetJointAccelerations(obj);
+                torques(end+1,:) = targetJointTorques(obj);
+
+                checkSafetyMode(obj);
+                pause(obj.frequency);
+
+                if toc(time0) > timeLimit
+                    if(jointOrPose == "joint")  
+                        jointPositions = goal;
+                    else 
+                        poses = goal;
+                    end
+                    disp("Time out. Something probably went wrong. Check if the Current pose and Target Pose are within the specified tolerance!");
+                    disp("-----DEBUGGING-----")
+                    disp("Current Pose")
+                    disp(goal(end,:))
+                    disp("Target Pose")
+                    disp(target)
+                    disp("The tolerance is set to:")
+                    disp(tolerance)
+                    
+                    return;
+                end
+            end
+
+            if(jointOrPose == "joint")  
+                jointPositions = goal;
+            else 
+                poses = goal;
+            end
+            disp("Succeeded!");
         end
 
     end

@@ -32,10 +32,11 @@ path_pose4 = [[-588.53, -233.30, 200, 2.2214, -2.2214, 0.00],acceleration, veloc
 
 path = [path_pose1; path_pose2; path_pose3; path_pose4; path_pose1];
 
-% disp("Home")
-poses3 = rtde.movel(home,'pose',acceleration,velocity,0,0.005);
-% disp("Path")
-poses = rtde.movel(path);
+
+
+
+poses3 = rtde.movej(home,'pose',acceleration,velocity,0,0.0);
+poses = rtde.movep(path);
 
 rtde.drawPath(poses)
 

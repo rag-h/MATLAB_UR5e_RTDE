@@ -9,6 +9,13 @@ classdef rtde
         socket
         % frequency at which data is read. Default is 0.01 (100hz)
         frequency
+        
+        % timeout is the lenght of time the program runs for before being
+        % terminated.
+
+        % Default = 60 seconds
+
+        timeout = 60
     end
     methods
         % Constructor to establish TCP connection with the ur5e
@@ -105,24 +112,58 @@ classdef rtde
         % will be modified to avoid the robot stopping at the point
         
         function [poses,joints,jointVelocities,jointAccelerations,torques] = movej(obj,target,jointOrPose,a,v,t,r)
-            % Setting defaults if the following variables do not exist
-            if ~exist('jointOrPose','var')
-                jointOrPose = "pose";
-            end
-            if ~exist('a','var')
-                a = 1.4;
-            end
-            if ~exist('v','var')
-                v = 1.05;
-            end
-            if ~exist('t','var')
-                t = 0;
-            end
-            if ~exist('r','var')
-                r = 0;
-            end
+            n = size(target,1);
+            
+            if n == 1
+                % Setting defaults if the following variables do not exist
+                
+                if ~exist('jointOrPose','var')
+                    jointOrPose = "pose";
+                end
+                if ~exist('a','var')
+                    a = 1.4;
+                end
+                if ~exist('v','var')
+                    v = 1.05;
+                end
+                if ~exist('t','var')
+                    t = 0;
+                end
+                if ~exist('r','var')
+                    r = 0;
+                end
+    
+                [poses,joints,jointVelocities,jointAccelerations,torques] = move(obj,'j',target,[],jointOrPose,a,v,r,t);
+        
+            else
+               command = "def function():";
+                for i = 1:n
+                    tar = target(i,1:6);
+                    tar(1:3) = tar(1:3) * 0.001;
+                    jointOrPose = "pose";
+                    a = target(i,7);
+                    v = target(i,8);
+                    t = target(i,9);
+                    r = target(i,10);
 
-            [poses,joints,jointVelocities,jointAccelerations,torques] = move(obj,'j',target,[],jointOrPose,a,v,r,t);
+                    target_char = ['movej' ,'(p[',num2str(tar(1)),',',...
+                    num2str(tar(2)),',',...
+                    num2str(tar(3)),',',...
+                    num2str(tar(4)),',',...
+                    num2str(tar(5)),',',...
+                    num2str(tar(6)),...
+                    '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')\n'];
+                    
+                    command = command + '' + target_char;
+    
+                end
+
+                 % Sending the command through as bytes
+                command = command + 'end\n';
+    
+                [poses,joints,jointVelocities,jointAccelerations,torques] = obj.sendCommand(command,jointOrPose);
+
+            end
         end
         
         % Function call for movel
@@ -142,7 +183,6 @@ classdef rtde
 
         function [poses,joints,jointVelocities,jointAccelerations,torques] = movel(obj,target,jointOrPose,a,v,t,r)
             % Setting defaults if the following variables do not exist
-%             disp(target)
             n = size(target,1);
             
             if n == 1
@@ -161,24 +201,12 @@ classdef rtde
                 if ~exist('r','var')
                      r = 0;
                 end
-
-%                 tar = target;
-%                 tar(1:3) = tar(1:3) * 0.001;
     
                 [poses,joints,jointVelocities,jointAccelerations,torques] = move(obj,'l',target,[],jointOrPose,a,v,r,t);
-%                 target_char = ['movel' ,'(p[',num2str(tar(1)),',',...
-%                 num2str(tar(2)),',',...
-%                 num2str(tar(3)),',',...
-%                 num2str(tar(4)),',',...
-%                 num2str(tar(5)),',',...
-%                 num2str(tar(6)),...
-%                 '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')\n'];
-%                 
-%                 command = command + '' + target_char;
+
             else
                command = "def function():";
                 for i = 1:n
-%                     disp("Needs to be handled")
                     tar = target(i,1:6);
                     tar(1:3) = tar(1:3) * 0.001;
                     jointOrPose = "pose";
@@ -219,21 +247,53 @@ classdef rtde
         % *v* = tool speed (m/s) (default = 0.25
         % *r* = blend radius (m) (default = 0)
         function [poses,joints,jointVelocities,jointAccelerations,torques] = movep(obj,target,jointOrPose,a,v,r)
-            % Setting defaults if the following variables do not exist
-            if ~exist('jointOrPose','var')
-                jointOrPose = "pose";
-            end
-            if ~exist('a','var')
-                 a = 1.2;
-            end
-            if ~exist('v','var')
-                v = 0.25;
-            end
-            if ~exist('r','var')
-                 r = 0;
-            end
+             n = size(target,1);
+            
+            if n == 1
+                % Setting defaults if the following variables do not exist
+                if ~exist('jointOrPose','var')
+                    jointOrPose = "pose";
+                end
+                if ~exist('a','var')
+                     a = 1.2;
+                end
+                if ~exist('v','var')
+                    v = 0.25;
+                end
+                if ~exist('r','var')
+                     r = 0;
+                end
+    
+                [poses,joints,jointVelocities,jointAccelerations,torques] = move(obj,'p',target,[],jointOrPose,a,v,r);
+            else
+               command = "def function():";
+                for i = 1:n
+                    tar = target(i,1:6);
+                    tar(1:3) = tar(1:3) * 0.001;
+                    jointOrPose = "pose";
+                    a = target(i,7);
+                    v = target(i,8);
+                    t = target(i,9);
+                    r = target(i,10);
 
-            [poses,joints,jointVelocities,jointAccelerations,torques] = move(obj,'p',target,[],jointOrPose,a,v,r);
+                    target_char = ['movep' ,'(p[',num2str(tar(1)),',',...
+                    num2str(tar(2)),',',...
+                    num2str(tar(3)),',',...
+                    num2str(tar(4)),',',...
+                    num2str(tar(5)),',',...
+                    num2str(tar(6)),...
+                    '],a=' num2str(a) ', v=' num2str(v) ',r=' num2str(r) ')\n'];
+                    
+                    command = command + '' + target_char;
+    
+                end
+
+                 % Sending the command through as bytes
+                command = command + 'end\n';
+    
+                [poses,joints,jointVelocities,jointAccelerations,torques] = obj.sendCommand(command,jointOrPose);
+
+            end
         end
 
               
@@ -564,7 +624,7 @@ classdef rtde
                         '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')\n'];
                 end
             end
-        
+            
             % Sending the command through as bytes
             fprintf(obj.socket,target_char);
             % Pause for a short interval to allow the command to be received 
@@ -587,7 +647,7 @@ classdef rtde
             end
 
             time0 = tic;
-            timeLimit = 30; % 30 seconds
+             timeLimit = obj.timeout; % 30 seconds
 
             % Appending the inital position of the arm to an array
             poses = actualPosePositions(obj);
@@ -645,7 +705,7 @@ classdef rtde
             end
             disp("Succeeded!");
         end
-
+% 
         % Following function reads the data recieved from the robot
         function data = readData(obj,byteOffset)
             flushinput(obj.socket)
@@ -682,7 +742,7 @@ classdef rtde
             tolerance = [0.0001,0.0001,0.0001,0.001,0.001,0.001];
 
                         % Pause for a short interval to allow the command to be received 
-            pause(0.3);
+            pause(0.1);
                         
             % Determining whether or not the arm has reached the target position
             % Poses(end,:) = current pose of the arm
@@ -694,14 +754,16 @@ classdef rtde
 
             if(jointOrPose == "joint")
                 function_to_call = @actualJointPositions;   
-                goal = actualJointPositions(obj);
+                goal = actualJointPositions();
+                target = obj.targetJointPositions();
             else
                 function_to_call = @actualPosePositions; 
-                goal = actualPosePositions(obj);
+                goal = obj.actualPosePositions();
+                target = obj.targetPosePositions();
             end
 
             time0 = tic;
-            timeLimit = 60; % 30 seconds
+            timeLimit = obj.timeout; % 60 seconds
 
             % Appending the inital position of the arm to an array
             poses = actualPosePositions(obj);
@@ -710,7 +772,7 @@ classdef rtde
             jointAccelerations = targetJointAccelerations(obj);
             torques = targetJointTorques(obj);
 
-            target = obj.targetPosePositions()
+%             target = obj.targetPosePositions();
 
             while (any(abs(goal(end,:) - target) > tolerance,'all'))
                 goal(end+1,:) = function_to_call(obj); 

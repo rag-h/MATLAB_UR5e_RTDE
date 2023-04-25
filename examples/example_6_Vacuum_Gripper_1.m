@@ -12,8 +12,7 @@ clc;
 clear all;
 
 % TCP Host and Port settings
-host = '127.0.0.1'; % THIS IP ADDRESS MUST BE USED FOR THE VM
-% host = '192.168.0.100'; % THIS IP ADDRESS MUST BE USED FOR THE REAL ROBOT
+host = '192.168.0.100'; % THIS IP ADDRESS MUST BE USED FOR THE REAL ROBOT
 port = 63352;
 
 % Calling the constructor of the vacuum gripper class 

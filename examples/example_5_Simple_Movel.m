@@ -5,7 +5,8 @@
 clear all;
 
 % TCP Host and Port settings
-host = '127.0.0.1'; % THIS IP ADDRESS MUST BE USED FOR THE VM
+% host = '127.0.0.1'; % THIS IP ADDRESS MUST BE USED FOR THE VIRTUAL BOX VM
+host = '192.168.230.128'; % THIS IP ADDRESS MUST BE USED FOR THE VMWARE
 % host = '192.168.0.100'; % THIS IP ADDRESS MUST BE USED FOR THE REAL ROBOT
 port = 30003;
 
@@ -44,13 +45,14 @@ point4 = [-588.53, -233.30, 200, 2.2214, -2.2214, 0.00];
 
 % Play around with these values and see what you observe!
 % What happens when you set a large/small r value?
+
 % What happens when you set a t value?
 % What happens when acceleration is large but the velocity is small?
 % What happens when the velocity is large but the acceleration is small?
 
 a = 1.0;
 v = 0.1;
-r = 0.05;
+r = 0.00; % Note if you want to set the value for r, make sure you look at example_7_paths
 
 % Remember when you set t, it will have priority over the a and v
 % parameters that you have set!

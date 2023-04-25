@@ -5,8 +5,8 @@
 clear all;
 
 % TCP Host and Port settings
-host = '127.0.0.1'; % THIS IP ADDRESS MUST BE USED FOR THE VM
-% host = '192.168.230.128'
+% host = '127.0.0.1'; % THIS IP ADDRESS MUST BE USED FOR THE VIRTUAL BOX VM
+host = '192.168.230.128'; % THIS IP ADDRESS MUST BE USED FOR THE VMWARE
 % host = '192.168.0.100'; % THIS IP ADDRESS MUST BE USED FOR THE REAL ROBOT
 port = 30003;
 
@@ -56,7 +56,7 @@ point4 = [-2.55204200000000	-2.07477000000000	-1.70951400000000	-0.9280480000000
 % Combining both resultant pose lists
 poses = [poses1;poses2;poses3;poses4;poses5;poses6];
 
-
+joints = [joints1;joints2;joints3;joints4;joints5;joints6];
 % Plotting the path of the TCP
 
 rtde.drawPath(poses)

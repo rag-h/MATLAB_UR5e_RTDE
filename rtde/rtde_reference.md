@@ -33,9 +33,9 @@ PARAMETERS:
  
  *jointOrPose*= "joint" or "pose" to provide joint inputs or pose inputs
  
- *a* = joint acceleration of the leading axis (default = 1.4)
+ *a* = joint acceleration of the leading axis (rad/s^2) (default = 1.4)
  
- *v* = joint speed of the leading axis (default = 1.05)
+ *v* = joint speed of the leading axis (rad/s)(default = 1.05)
  
  *t* = time (s) (default = 0). If it were specified the command would ignore the a and v values
  
@@ -49,11 +49,11 @@ PARAMETERS:
 
  *target*: Target pose (pose can also be specified as joint positions, then forward kinematics is used to calculate the corresponding pose)
  
- *a* = joint acceleration of the leading axis (default = 1.2)
+ *a* = joint acceleration of the leading axis (m/s^2) (default = 1.2)
  
  *jointOrPose*= "joint" or "pose" to provide joint inputs or pose inputs
  
- *v* = joint speed of the leading axis (default = 0.25)
+ *v* = joint speed of the leading axis (m/s)(default = 0.25)
  
  *t* = time (s) (default = 0). If it were specified the command would ignore the a and v values
  
@@ -73,6 +73,26 @@ PARAMETERS:
  *v* = tool speed (m/s) (default = 0.25
  
  *r* = blend radius (m) (default = 0)
+
+## Function call for speedl
+Definition: [poses,joints,jointVelocities,jointAccelerations,torques] = speedl(obj,tool_speed,acceleration,time,aRot)
+Tool Speed
+Accelerate linearly in Cartesian space and continue with constant tool  speed. The time t is optional; if provided the function will return after time t, regardless of the target speed has been reached. If the time t is not provided, the function will return when the target speed is reached.
+PARAMETERS
+*tool_speed* = (m/s) spatial vector
+*acceleration* = tool position acceleration(m/s^2) 
+t: time [s] before function returns (optional)
+aRot: tool acceleration [rad/s^2] (optional), if not defined
+a, position acceleration, is used
+
+## Function call for speedj
+Definition: [poses,joints,jointVelocities,jointAccelerations,torques] = speedj(obj,joint_speeds,acceleration,time)
+Joint speed
+Accelerate linearly in joint space and continue with constant joint speed. The time t is optional; if provided the function will return after time t, regardless of the target speed has been reached. If the time t is not provided, the function will return when the target speed is reached.
+PARAMETERS
+*joint_speeds* = (rad/s) joint speeds
+*acceleration* = joint acceleration(rad/s^2) 
+t: time [s] before function returns (optional)
 
 ## Check Robot Mode:
 Definition : robotMode = checkRobotMode()

@@ -23,20 +23,22 @@ classdef rtde
 
             obj.frequency = 0.01;
 
-            obj.socket = tcpip(host, port);
+%             obj.socket = tcpip(host, port);
+            obj.socket = tcpclient(host,port);
+            obj.socket.ByteOrder = "little-endian";
 
-            obj.socket.InputBufferSize = 1220;
-            obj.socket.OutputBufferSize = 3000;
+%             obj.socket.InputBufferSize = 1220;
+%             obj.socket.OutputBufferSize = 3000;
             
-            fopen(obj.socket);
+%             fopen(obj.socket);
 
             disp('UR5e connection Established!');
         end
 
         % Close Socket
         function close(obj)
-            fclose(obj.socket);
-            delete(obj.socket);
+%             fclose(obj.socket);
+%             delete(obj.socket);
             clear obj.socket;
 
             disp("Socket Disconnected!")
@@ -136,7 +138,7 @@ classdef rtde
                 [poses,joints,jointVelocities,jointAccelerations,torques] = move(obj,'j',target,[],jointOrPose,a,v,r,t);
         
             else
-               command = "def function():";
+               command = 'def function():';
                 for i = 1:n
                     tar = target(i,1:6);
                     tar(1:3) = tar(1:3) * 0.001;
@@ -152,14 +154,14 @@ classdef rtde
                     num2str(tar(4)),',',...
                     num2str(tar(5)),',',...
                     num2str(tar(6)),...
-                    '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')\n'];
+                    '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')',10];
                     
-                    command = command + '' + target_char;
+                    command = [command,target_char];
     
                 end
 
                  % Sending the command through as bytes
-                command = command + 'end\n';
+                command = [command,'end',10];
     
                 [poses,joints,jointVelocities,jointAccelerations,torques] = obj.sendCommand(command,jointOrPose);
 
@@ -205,7 +207,7 @@ classdef rtde
                 [poses,joints,jointVelocities,jointAccelerations,torques] = move(obj,'l',target,[],jointOrPose,a,v,r,t);
 
             else
-               command = "def function():";
+               command = 'def function():';
                 for i = 1:n
                     tar = target(i,1:6);
                     tar(1:3) = tar(1:3) * 0.001;
@@ -221,14 +223,16 @@ classdef rtde
                     num2str(tar(4)),',',...
                     num2str(tar(5)),',',...
                     num2str(tar(6)),...
-                    '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')\n'];
+                    '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')',10];
                     
-                    command = command + '' + target_char;
+                    
+                    command = [command,target_char];
     
                 end
 
                  % Sending the command through as bytes
-                command = command + 'end\n';
+                command = [command,'end',10];
+
     
                 [poses,joints,jointVelocities,jointAccelerations,torques] = obj.sendCommand(command,jointOrPose);
 
@@ -266,7 +270,7 @@ classdef rtde
     
                 [poses,joints,jointVelocities,jointAccelerations,torques] = move(obj,'p',target,[],jointOrPose,a,v,r);
             else
-               command = "def function():";
+               command = 'def function():';
                 for i = 1:n
                     tar = target(i,1:6);
                     tar(1:3) = tar(1:3) * 0.001;
@@ -282,21 +286,223 @@ classdef rtde
                     num2str(tar(4)),',',...
                     num2str(tar(5)),',',...
                     num2str(tar(6)),...
-                    '],a=' num2str(a) ', v=' num2str(v) ',r=' num2str(r) ')\n'];
+                    '],a=' num2str(a) ', v=' num2str(v) ',r=' num2str(r) ')',10];
                     
-                    command = command + '' + target_char;
+                    command = [command,target_char];
     
                 end
 
                  % Sending the command through as bytes
-                command = command + 'end\n';
+                command = [command,'end',10];
+
     
                 [poses,joints,jointVelocities,jointAccelerations,torques] = obj.sendCommand(command,jointOrPose);
 
             end
         end
 
-              
+        % Servo J
+        % Servo to Position, linear in joint space
+        % Servo function used for online control of the robot. The lookahead time
+        % and the gain can be used to smoothen or sharpen the trajectory.
+        % Note: A high gain or a short lookahead time may cause instability.
+        % Prefered use is to call this function with a new setpoint (q) in each time
+        % step (thus the default t=0.008
+
+        function [poses,joints,jointVelocities,jointAccelerations,torques] = servoj(obj,target_joint_positions,velocity,acceleration,t,lookahead_time,gain)
+            % Setting defaults if the following variables do not exist
+            if ~exist('t','var')
+                 t = 0.008;
+            end
+
+            if ~exist('lookahead_time','var')
+                 lookahead_time = 0.1;
+            end
+
+            if ~exist('gain','var')
+                 gain = 300;
+            end
+
+            tolerance = [0.05,0.05,0.05,0.05,0.05,0.05];
+
+            command = ['servoj','([',num2str(target_joint_positions(1)),',',...
+                    num2str(target_joint_positions(2)),',',...
+                    num2str(target_joint_positions(3)),',',...
+                    num2str(target_joint_positions(4)),',',...
+                    num2str(target_joint_positions(5)),',',...
+                    num2str(target_joint_positions(6)),...
+                    '],' num2str(velocity) ',' num2str(acceleration) ',' num2str(t) ',' num2str(lookahead_time) ',' num2str(gain) ')']
+
+
+
+%             [poses,joints,jointVelocities,jointAccelerations,torques] = obj.sendCommand(command,'joint');
+%             % Sending the command through as bytes
+%             fprintf(obj.socket,command);
+
+            configureTerminator(obj.socket,"LF")
+            writeline(obj.socket,command)
+%             % Pause for a short interval to allow the command to be received 
+%             pause(0.3);
+% 
+%             time0 = tic;
+%             timeLimit = 30; % 10 seconds
+%             
+%             joint_positions = actualJointPositions(obj);
+% 
+%             while any(abs(joint_positions(end,:) - target_joint_positions) > tolerance,'all') 
+%                 joint_positions(end+1,:) = actualJointPositions(obj);           
+%                 checkSafetyMode(obj);
+%                 pause(obj.frequency);
+% 
+% %                 poses(end,:)
+% %                 target_joint_positions
+% %                 abs(poses(end,:) - target_joint_positions)
+% %                 tolerance
+% 
+%                 if toc(time0)>timeLimit
+%                     disp("Failed!");
+%                     return;
+%                 end
+%              end 
+            disp("Succeeded!")
+
+
+        end
+        
+        % Function call for speedj
+        % Definition: [poses,joints,jointVelocities,jointAccelerations,torques] = speedj(obj,joint_speeds,acceleration,time)
+        % Joint speed
+        % Accelerate linearly in joint space and continue with constant joint
+        % speed. The time t is optional; if provided the function will return after
+        % time t, regardless of the target speed has been reached. If the time t is
+        % not provided, the function will return when the target speed is reached.
+        % PARAMETERS
+        % *joint_speeds* = (rad/s) joint speeds
+        % *acceleration* = joint acceleration(rad/s^2) 
+        % t: time [s] before function returns (optional)
+        function [poses,jointPositions,jointVelocities,jointAccelerations,torques] = speedj(obj,joint_speeds,acceleration,time)
+            if ~exist('time','var')
+                 command = ['speedj','([',num2str(joint_speeds(1)),',',...
+                    num2str(joint_speeds(2)),',',...
+                    num2str(joint_speeds(3)),',',...
+                    num2str(joint_speeds(4)),',',...
+                    num2str(joint_speeds(5)),',',...
+                    num2str(joint_speeds(6)),...
+                    '],'  num2str(acceleration) ')']
+            else
+                command = ['speedj','([',num2str(joint_speeds(1)),',',...
+                    num2str(joint_speeds(2)),',',...
+                    num2str(joint_speeds(3)),',',...
+                    num2str(joint_speeds(4)),',',...
+                    num2str(joint_speeds(5)),',',...
+                    num2str(joint_speeds(6)),...
+                    '],'  num2str(acceleration) ',' num2str(time) ')']
+            end
+            
+            
+%             fprintf(obj.socket,command);
+            configureTerminator(obj.socket,"LF")
+            writeline(obj.socket,command)
+
+            poses = actualPosePositions(obj);
+            jointPositions = actualJointPositions(obj);
+            jointVelocities = actualJointVelocities(obj);
+            jointAccelerations = targetJointAccelerations(obj);
+            torques = targetJointTorques(obj);
+
+
+            while(1)
+                if all(TCPSpeedActual(obj) == 0)
+                        break
+                end
+     
+                poses(end+1,:) = actualPosePositions(obj);
+                jointPositions(end+1,:) = actualJointPositions(obj);    
+    
+                jointVelocities(end+1,:) = actualJointVelocities(obj);
+                jointAccelerations(end+1,:) = targetJointAccelerations(obj);
+                torques(end+1,:) = targetJointTorques(obj);
+    
+                checkSafetyMode(obj);
+                pause(obj.frequency);
+            end
+
+
+        end
+
+        % Function call for speedl
+        % Definition: [poses,joints,jointVelocities,jointAccelerations,torques] = speedl(obj,tool_speed,acceleration,time,aRot)
+        % Tool Speed
+        % Accelerate linearly in Cartesian space and continue with constant tool
+        % speed. The time t is optional; if provided the function will return after
+        % time t, regardless of the target speed has been reached. If the time t is
+        % not provided, the function will return when the target speed is reached.
+        % PARAMETERS
+        % *tool_speed* = (m/s) spatial vector
+        % *acceleration* = tool position acceleration(m/s^2) 
+        % t: time [s] before function returns (optional)
+        % aRot: tool acceleration [rad/s^2] (optional), if not defined
+        % a, position acceleration, is used
+        function [poses,jointPositions,jointVelocities,jointAccelerations,torques] = speedl(obj,tool_speed,acceleration,time,aRot)
+            if ~exist('time','var') && ~exist('aRot','var')
+                 command = ['speedl','([',num2str(tool_speed(1)),',',...
+                    num2str(tool_speed(2)),',',...
+                    num2str(tool_speed(3)),',',...
+                    num2str(tool_speed(4)),',',...
+                    num2str(tool_speed(5)),',',...
+                    num2str(tool_speed(6)),...
+                    '],'  num2str(acceleration) ')'];
+            elseif ~exist('aRot','var')
+                command = ['speedl','([',num2str(tool_speed(1)),',',...
+                    num2str(tool_speed(2)),',',...
+                    num2str(tool_speed(3)),',',...
+                    num2str(tool_speed(4)),',',...
+                    num2str(tool_speed(5)),',',...
+                    num2str(tool_speed(6)),...
+                    '],'  num2str(acceleration) ',' num2str(time) ')'];
+            else
+                command = ['speedl','([',num2str(tool_speed(1)),',',...
+                    num2str(tool_speed(2)),',',...
+                    num2str(tool_speed(3)),',',...
+                    num2str(tool_speed(4)),',',...
+                    num2str(tool_speed(5)),',',...
+                    num2str(tool_speed(6)),...
+                    '],'  num2str(acceleration) ',' num2str(time) ',' num2str(aRot) ')'];
+
+            end
+            
+            
+%             fprintf(obj.socket,command);
+
+            configureTerminator(obj.socket,"LF")
+            writeline(obj.socket,command)
+
+            poses = actualPosePositions(obj);
+            jointPositions = actualJointPositions(obj);
+            jointVelocities = actualJointVelocities(obj);
+            jointAccelerations = targetJointAccelerations(obj);
+            torques = targetJointTorques(obj);
+
+
+            while(1)
+                if all(TCPSpeedActual(obj) == 0)
+                        break
+                end
+     
+                poses(end+1,:) = actualPosePositions(obj);
+                jointPositions(end+1,:) = actualJointPositions(obj);    
+    
+                jointVelocities(end+1,:) = actualJointVelocities(obj);
+                jointAccelerations(end+1,:) = targetJointAccelerations(obj);
+                torques(end+1,:) = targetJointTorques(obj);
+    
+                checkSafetyMode(obj);
+                pause(obj.frequency);
+            end
+
+
+        end
+        
         % ROBOT MODE
         % RETURN VALUES:
         %-1 : ROBOT_MODE_NO_CONTROLLE
@@ -340,10 +546,13 @@ classdef rtde
 
         function safetyMode = checkSafetyMode(obj)
           
-            while obj.socket.BytesAvailable==0
-                %t.BytesAvailable
+            if obj.socket.NumBytesAvailable>0
+                read(obj.socket,obj.socket.NumBytesAvailable);
             end
-            rec = fread(obj.socket,obj.socket.BytesAvailable);
+            while obj.socket.NumBytesAvailable==0
+            end
+
+            rec = read(obj.socket,obj.socket.BytesAvailable);
             
             % Following is the offset in the message to retrieve the robot_mode
             val = 4 + 8 + 48 + 48 + 48 + 48 + 48+ 48 + 48 + 48 + 48 + 48 +48 + 48 + 48 +48 + 8 + 48 + 8 + 8 + 8 + 48;
@@ -449,7 +658,7 @@ classdef rtde
             plot(jointPositions(:,5));
             plot(jointPositions(:,6));
             title('Joint positions')
-            xlabel('Time (s)'); 
+            xlabel('Samples'); 
             ylabel('Joint angles (radians)');
             legend({'Base','Shoulder','Elbow','Wrist 1','Wrist 2','Wrist 3'},'Location','southwest');
             hold off;
@@ -465,7 +674,7 @@ classdef rtde
             plot(jointVelocities(:,5));
             plot(jointVelocities(:,6));
             title('Joint Velocities');
-            xlabel('Time (s)'); 
+            xlabel('Samples'); 
             ylabel('Velocity (rad/s)');
             legend({'Base','Shoulder','Elbow','Wrist 1','Wrist 2','Wrist 3'},'Location','southwest');
             hold off;
@@ -481,7 +690,7 @@ classdef rtde
             plot(jointAccelerations(:,5));
             plot(jointAccelerations(:,6));
             title('Joint Accelerations');
-            xlabel('Time (s)'); 
+            xlabel('Samples'); 
             ylabel('Acceleration (rad/s^2)');
             legend({'Base','Shoulder','Elbow','Wrist 1','Wrist 2','Wrist 3'},'Location','southwest');
             hold off;
@@ -497,7 +706,7 @@ classdef rtde
             plot(torques(:,5));
             plot(torques(:,6));
             title('Joint Torques');
-            xlabel('Time (s)'); 
+            xlabel('Samples'); 
             ylabel('Torque (Nm)');
             legend({'Base','Shoulder','Elbow','Wrist 1','Wrist 2','Wrist 3'},'Location','southwest');
             hold off;
@@ -508,6 +717,7 @@ classdef rtde
             figure;
             line(poses(:,1), poses(:,2),poses(:,3));
             view(3);
+            axis equal;
             title('TCP path')
             xlabel('x-axis'); 
             ylabel('y-axis');
@@ -532,8 +742,11 @@ classdef rtde
         % call this function directly.
         function [poses,jointPositions,jointVelocities,jointAccelerations,torques] = move(obj,type,target,via_point,jointOrPose,a,v,r,t,mode)
         
-            flushinput(obj.socket)
-            flushoutput(obj.socket)
+%             flushinput(obj.socket)
+%             flushoutput(obj.socket)
+            % tcpclient stuff
+            flush(obj.socket)
+            flush(obj.socket)
         
 %            tolerance = [0.0001,0.0001,0.0001,0.001,0.001,0.001];
            tolerance = [0.0001+r,0.0001+r,0.0001+r,0.001,0.001,0.001];
@@ -557,7 +770,7 @@ classdef rtde
                         num2str(target(4)),',',...
                         num2str(target(5)),',',...
                         num2str(target(6)),...
-                        '],a=' num2str(a) ', v=' num2str(v) ', r=' num2str(r) ',mode=' num2str(mode) ')\n'];
+                        '],a=' num2str(a) ', v=' num2str(v) ', r=' num2str(r) ',mode=' num2str(mode) ')'];
                 elseif (type == "p")
                     target_char = ['move', type ,'([',num2str(target(1)),',',...
                         num2str(target(2)),',',...
@@ -565,7 +778,7 @@ classdef rtde
                         num2str(target(4)),',',...
                         num2str(target(5)),',',...
                         num2str(target(6)),...
-                        '],a=' num2str(a) ', v=' num2str(v) ',r=' num2str(r) ')\n'];
+                        '],a=' num2str(a) ', v=' num2str(v) ',r=' num2str(r) ')'];
                 else
                     if(r ~= 0)
                     tolerance(1:3) = r;
@@ -577,7 +790,7 @@ classdef rtde
                         num2str(target(4)),',',...
                         num2str(target(5)),',',...
                         num2str(target(6)),...
-                        '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')\n'];
+                        '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')'];
                 end
             else
                 target(1:3) = target(1:3) * 0.001; % Converting to meter
@@ -601,7 +814,7 @@ classdef rtde
                         num2str(target(4)),',',...
                         num2str(target(5)),',',...
                         num2str(target(6)),...
-                        '],a=' num2str(a) ', v=' num2str(v) ', r=' num2str(r) ',mode=' num2str(mode) ')\n'];
+                        '],a=' num2str(a) ', v=' num2str(v) ', r=' num2str(r) ',mode=' num2str(mode) ')'];
                 elseif (type == "p")
                     target_char = ['move', type ,'(p[',num2str(target(1)),',',...
                         num2str(target(2)),',',...
@@ -609,7 +822,7 @@ classdef rtde
                         num2str(target(4)),',',...
                         num2str(target(5)),',',...
                         num2str(target(6)),...
-                        '],a=' num2str(a) ', v=' num2str(v) ',r=' num2str(r) ')\n'];
+                        '],a=' num2str(a) ', v=' num2str(v) ',r=' num2str(r) ')'];
                 else
                     if(r ~= 0)
                     tolerance(1:3) = r;
@@ -621,12 +834,25 @@ classdef rtde
                         num2str(target(4)),',',...
                         num2str(target(5)),',',...
                         num2str(target(6)),...
-                        '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')\n'];
+                        '],a=' num2str(a) ', v=' num2str(v) ', t=' num2str(t) ',r=' num2str(r) ')'];
                 end
             end
             
             % Sending the command through as bytes
-            fprintf(obj.socket,target_char);
+%             fprintf(obj.socket,target_char);
+
+            %tcpclient stuff
+%             configureTerminator(obj.socket,0,10)
+%             obj.socket.Terminator
+%             writeline(obj.socket,target_char)
+
+
+%             target_char
+%             writebinblock(obj.socket,target_char,"uint8")
+
+            target_char = [target_char,10];
+            b = uint8(target_char);
+            write(obj.socket,b);
             % Pause for a short interval to allow the command to be received 
             pause(0.3);
                         
@@ -708,16 +934,26 @@ classdef rtde
 % 
         % Following function reads the data recieved from the robot
         function data = readData(obj,byteOffset)
-            flushinput(obj.socket)
-            flushoutput(obj.socket)
+%             flushinput(obj.socket)
+%             flushoutput(obj.socket
+            % tcpclient stuff
+            flush(obj.socket)
+            flush(obj.socket)
         
-            if obj.socket.BytesAvailable>0
-                fread(obj.socket,obj.socket.BytesAvailable);
-            end
-            while obj.socket.BytesAvailable==0
-            end
+%             if obj.socket.BytesAvailable>0
+%                 fread(obj.socket,obj.socket.BytesAvailable);
+%             end
+%             while obj.socket.BytesAvailable==0
+%             end
         
-            rec = fread(obj.socket,obj.socket.BytesAvailable);
+            %tcpclient: 
+            if obj.socket.NumBytesAvailable>0
+                read(obj.socket,obj.socket.NumBytesAvailable);
+            end
+            while obj.socket.NumBytesAvailable==0
+            end
+
+            rec = read(obj.socket,obj.socket.BytesAvailable);
             
             for i = 1 : 6
         
@@ -735,14 +971,20 @@ classdef rtde
         end
 
         function [poses,jointPositions,jointVelocities,jointAccelerations,torques] =  sendCommand(obj,command,jointOrPose)
-            flushinput(obj.socket);
-            flushoutput(obj.socket);
-            fprintf(obj.socket,command);
+            flush(obj.socket);
+%             fprintf(obj.socket,command);
+            
+%             configureTerminator(obj.socket,"CR/LF",10)
+%             writeline(obj.socket,command)
+%             writebinblock(obj.socket,command,"string")
+
+            b = uint8(command);
+            write(obj.socket,b);
 
             tolerance = [0.0001,0.0001,0.0001,0.001,0.001,0.001];
 
-                        % Pause for a short interval to allow the command to be received 
-            pause(0.1);
+            % Pause for a short interval to allow the command to be received 
+            pause(0.3);
                         
             % Determining whether or not the arm has reached the target position
             % Poses(end,:) = current pose of the arm

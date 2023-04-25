@@ -5,7 +5,8 @@
 clear all;
 
 % TCP Host and Port settings
-host = '127.0.0.1'; % THIS IP ADDRESS MUST BE USED FOR THE VM
+% host = '127.0.0.1'; % THIS IP ADDRESS MUST BE USED FOR THE VIRTUAL BOX VM
+host = '192.168.230.128'; % THIS IP ADDRESS MUST BE USED FOR THE VMWARE
 % host = '192.168.0.100'; % THIS IP ADDRESS MUST BE USED FOR THE REAL ROBOT
 port = 30003;
 
@@ -57,7 +58,7 @@ point4 = [-588.53, -233.30, 100, 2.2214, -2.2214, 0.00];
 
 a = 1.0;
 v = 0.5;
-r = 0.0;
+r = 0.0; % Note if you want to set the value for r, make sure you look at example_7_paths
 
 % Remember when you set t, it will have priority over the a and v
 % parameters that you have set!

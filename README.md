@@ -3,6 +3,7 @@ An abstraction layer allowing tcp communication between Matlab (windows) to ursi
 
 ## Pre-requsites
 1. Ensure that you have setup the URSim properly.
+2. Some of the example code use Peter Corkes RVC Toolbox (matlab version), please install that as well
 
 ## Download from Github
 1. Download code as a zip file.

@@ -114,14 +114,15 @@ classdef rtde
         % will be modified to avoid the robot stopping at the point
         
         function [poses,joints,jointVelocities,jointAccelerations,torques] = movej(obj,target,jointOrPose,a,v,t,r)
+            if ~exist('jointOrPose','var')
+                jointOrPose = "pose";
+            end
+
             n = size(target,1);
             
             if n == 1
                 % Setting defaults if the following variables do not exist
                 
-                if ~exist('jointOrPose','var')
-                    jointOrPose = "pose";
-                end
                 if ~exist('a','var')
                     a = 1.4;
                 end
@@ -138,17 +139,25 @@ classdef rtde
                 [poses,joints,jointVelocities,jointAccelerations,torques] = move(obj,'j',target,[],jointOrPose,a,v,r,t);
         
             else
-               command = 'def function():';
+                commandType = '';
+                if jointOrPose == "pose"
+                    commandType = 'p';
+                end
+
+                command = 'def function():';
                 for i = 1:n
                     tar = target(i,1:6);
-                    tar(1:3) = tar(1:3) * 0.001;
-                    jointOrPose = "pose";
+
+                    if jointOrPose == "pose"
+                        tar(1:3) = tar(1:3) * 0.001;
+                    end
+
                     a = target(i,7);
                     v = target(i,8);
                     t = target(i,9);
                     r = target(i,10);
 
-                    target_char = ['movej' ,'(p[',num2str(tar(1)),',',...
+                    target_char = ['movej' ,'(',commandType,'[',num2str(tar(1)),',',...
                     num2str(tar(2)),',',...
                     num2str(tar(3)),',',...
                     num2str(tar(4)),',',...
@@ -161,7 +170,7 @@ classdef rtde
                 end
 
                  % Sending the command through as bytes
-                command = [command,'end',10];
+                command = [command,'end',10]
     
                 [poses,joints,jointVelocities,jointAccelerations,torques] = obj.sendCommand(command,jointOrPose);
 
@@ -996,7 +1005,7 @@ classdef rtde
 
             if(jointOrPose == "joint")
                 function_to_call = @actualJointPositions;   
-                goal = actualJointPositions();
+                goal = obj.actualJointPositions();
                 target = obj.targetJointPositions();
             else
                 function_to_call = @actualPosePositions; 

@@ -14,7 +14,7 @@ classdef vacuum
     end
     methods
         function obj = vacuum(host,port)
-            obj.socket = tcpip(host, port);
+            obj.socket = tcpclient(host, port);
             
             obj.socket.InputBufferSize = 1220;
             obj.socket.OutputBufferSize = 3000;

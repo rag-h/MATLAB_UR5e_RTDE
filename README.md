@@ -32,14 +32,18 @@ An abstraction layer allowing tcp communication between Matlab (windows) to ursi
 ![Select set Path](https://github.com/rag-h/mtrn4230_course_development/blob/main/rtde/images/select%20set%20path.png)
 2. Navigate to where you saved the rtde folder. The path should be something like "C:\Program Files\MATLAB\R2021b\toolbox\RTDE" for **windows**. For **OSX**, you’ll need to select the “rtde alias” that you saved on the desktop. 
 (Note: The image below is just an example, it does not show the correct file path)
-
 ![Find File](https://github.com/rag-h/mtrn4230_course_development/blob/main/rtde/images/setpath.png)
-
 3. Press save. 
-4. Install the Instrument Control Toolbox in Matlab. In the Matlab Command Window, type "tmtool", a pop up window will appear, saying "require Instrument Control Toolbox".
-11. Click on the tab "Instrument Control Toolbox" in the popped up window
-12. Log in with your unsw account to add the toolbox to your existing Matlab
-13. Finish Installation
+4. Install the Instrument Control Toolbox in MATLAB. Select Add-Ons in the Home Tab and select Get Add-Ons.
+![Find File](https://github.com/rag-h/mtrn4230_course_development/blob/main/rtde/images/AddOnLocation.png)
+5. In the Add-On explorer type Instrument Control Toolbox in the search bar, and select the first option from the drop down.
+![Find File](https://github.com/rag-h/mtrn4230_course_development/blob/main/rtde/images/AddOnExploxer.png)
+6. Click Install on the Instrument Control Toolbox page. You may need to log in with your UNSW account to enable the Install button.
+7. Finish Installation.
+
+
+
+
 
 ## Verify that the RTDE Toolbox works
 1. Open up the Virtual Machine

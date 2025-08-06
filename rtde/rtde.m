@@ -993,7 +993,7 @@ classdef rtde
             tolerance = [0.0001,0.0001,0.0001,0.001,0.001,0.001];
 
             % Pause for a short interval to allow the command to be received 
-            pause(0.3);
+            pause(1.0);
                         
             % Determining whether or not the arm has reached the target position
             % Poses(end,:) = current pose of the arm
@@ -1076,5 +1076,6 @@ classdef rtde
         end
 
     end
+
 
 end
